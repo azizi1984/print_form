@@ -1,22 +1,35 @@
-# ใช้ Base Image ของ PHP 8.3-FPM (เวอร์ชันล่าสุดสำหรับ Laravel 12)
 FROM php:8.3-fpm-alpine
 
-# Set working directory
+# Install base packages and PHP extensions
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    oniguruma-dev \
+    curl \
+    git \
+    unzip \
+    npm
+
+RUN docker-php-ext-install zip gd mbstring pdo pdo_mysql bcmath opcache
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
 WORKDIR /var/www/html
 
-# ติดตั้ง extensions ที่จำเป็นสำหรับ Laravel
-# (คุณสามารถเพิ่ม extension อื่นๆ ได้ตามต้องการ เช่น gd, intl)
-RUN docker-php-ext-install pdo pdo_mysql bcmath opcache
+COPY . /var/www/html/
 
-# ติดตั้ง Composer (ตัวจัดการ Package ของ PHP)
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN composer install --no-dev --optimize-autoloader
 
-# ตั้งค่า permissions (เพื่อให้ Laravel เขียน log และ cache ได้)
-# เราจะรัน chown/chmod หลังจากที่ mount volume แล้ว
-COPY . .
+RUN npm install
+
+RUN npm run build
+
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Expose port 9000 and start php-fpm server
 EXPOSE 9000
+
 CMD ["php-fpm"]
