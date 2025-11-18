@@ -10,4 +10,11 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    server: {
+        host: '0.0.0.0', // ฟังทุก IP
+        port: 5173,      // Port มาตรฐานของ Vite
+        hmr: {
+            host: 'localhost', // บอกเบราว์เซอร์ให้เชื่อมต่อกลับมาที่ localhost
+        },
+    },
 });
