@@ -4,7 +4,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile
+      dockerfile: ./docker/php/Dockerfile
     container_name: laravel_app
     restart: unless-stopped
     working_dir: /var/www/html
@@ -14,10 +14,10 @@ services:
       - laravel-net
     depends_on:
       - redis
-    # --- เพิ่มบรรทัดนี้เข้าไป ---
+
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    # --------------------------
+
 
   web:
     image: nginx:alpine
@@ -32,6 +32,19 @@ services:
       - laravel-net
     depends_on:
       - app
+
+  vite:
+        image: node:20-alpine
+        container_name: print-form-vite
+        restart: unless-stopped
+        working_dir: /var/www/html
+        ports:
+            - "5173:5173"
+        volumes:
+            - .:/var/www/html
+        networks:
+            - laravel-net
+        command: sh -c "npm install && npm run dev"
 
   redis:
     image: redis:alpine
