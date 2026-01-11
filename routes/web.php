@@ -1,17 +1,26 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RoleController;
 
 
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/', function () {
-    return view('auth.login');
+
+Route::get('/print-form', function () {
+    return view('form.form');
 });
 
+Route::resource('roles', RoleController::class);
 
-Route::get('/dashboard', function () {
-    return view('admin.dashboard');
-})->name('dashboard');
+Route::middleware(['auth'])->group(function () {
+    // dashboard
+    Route::get('/dashboard', function () {
+        return view('layouts.admin');
+    })->name('dashboard');
+
+});

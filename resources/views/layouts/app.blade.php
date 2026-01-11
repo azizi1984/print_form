@@ -11,8 +11,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="@yield('body-class')">
-    <main>
-        @yield('content')
-    </main>
+    @extends('layouts.topbar')
+    @yield('content')
 </body>
 </html>

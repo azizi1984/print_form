@@ -15,10 +15,10 @@
                 <i class="fas fa-layer-group"></i> MINIBLE
             </a>
 
-            <div class="search-box">
+            <!-- <div class="search-box">
                 <i class="fas fa-search"></i>
                 <input type="text" class="form-control" placeholder="Search...">
-            </div>
+            </div> -->
 
             <div class="topbar-menu">
                 <a href="#"><i class="fas fa-flag"></i></a>
@@ -44,15 +44,15 @@
                 <a class="nav-link active" href="#"><i class="fas fa-home"></i> Dashboard</a>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="managementDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="nav-link dropdown-toggle" href="{{ route('roles.index') }}" id="managementDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-gear-fill me-1"></i>
-                    Management
+                    Create Profile
                 </a>
 
                 <ul class="dropdown-menu" aria-labelledby="managementDropdown">
 
                     <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="{{ route('roles.index') }}">
                             <i class="bi bi-people me-2 text-muted"></i> Users List
                         </a>
                     </li>
