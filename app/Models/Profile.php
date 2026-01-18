@@ -12,11 +12,12 @@ class Profile extends Model
     use HasFactory, Notifiable, SoftDeletes;
 
     protected $table = 'profiles';
-    protected $primaryKey = 'profile_id';
+    protected $primaryKey = 'id';
     protected $fillable = [
         'profile_id',
         'profile_tax',
         'status',
+        'remark',
     ];
 
     protected $casts = [
