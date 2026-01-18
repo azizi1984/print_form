@@ -10,58 +10,68 @@ use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-class ProfileController extends Controller
+class UserController extends Controller
 {
-    public function getAllProfiles()
+    public function getAllUsers()
     {
-        $profile = Profile::all();
+        $user = User::all();
         return response()->json([
             'status' => Status::Active->value,
             'message' => 'get success',
-            'profile' => $profile,
+            'user' => $user,
         ]);
     }
-
+    
     public function store(Request $request)
     {
         $request->validate([
+            'username' => 'required',
+            'comp_tax' => 'required',
             'profile_id' => 'required',
-            'profile_tax' => 'required',
         ]);
 
-        $profile = Profile::where('profile_id', $request->profile_id)
-            ->orWhere('profile_tax', $request->profile_tax)
+        $user = User::where('username', $request->username)
+            ->Where('profile_id', $request->profile_id)
             ->first();
 
-        if ($profile) {
+        if ($user) {
             return response()->json([
                 'status' => Status::InActive->value,
-                'message' => 'Profile or Tax already exists',
+                'message' => 'User already exists',
             ], 200);
         }
 
         DB::beginTransaction();
 
         try {
-            $profile = Profile::create([
+            $user = User::create([
+                'username' => $request->username,
+                'password' => Hash::make($request->password),
+                'firstname' => $request->firstname ?? "",
+                'lastname' => $request->lastname ?? "",
+                'email' => $request->email ?? "",
+                'comp_tax' => $request->comp_tax,
                 'profile_id' => $request->profile_id,
-                'profile_tax' => $request->profile_tax,
                 'status' => $request->status ?? Status::Active->value,
-                'remark' => $request->profile_remark ?? "",
+                'remark' => $request->remark ?? "",
             ]);
+
+            $user = User::find($user->id);
+            $user->syncPermissions([]);
+            $user->syncPermissions($request->service);
 
             DB::commit();
 
             return response()->json([
                 'status' => Status::Active->value,
                 'message' => 'create success',
-                'profile' => $profile,
+                'user' => $user,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'status' => Status::InActive->value,
-                'message' => 'Error creating profile',
+                'message' => 'Error creating user',
                 'description' => $e->getMessage()
             ], 200);
         }
@@ -70,32 +80,40 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $request->validate([
+            'username' => 'required',
             'profile_id' => 'required',
-            'profile_tax' => 'required',
         ]);
 
-        $profile = Profile::where('profile_id', $request->profile_id)
-            ->Where('profile_tax', $request->profile_tax)
+        $user = User::where('username', $request->username)
+            ->Where('profile_id', $request->profile_id)
             ->first();
 
-        if (!$profile) {
+        if (!$user) {
             return response()->json([
                 'status' => Status::InActive->value,
-                'message' => 'Cannot update profile. Please check profile id or profile tax',
+                'message' => 'Cannot update user. Please check user username or profile id',
             ], 200);
         }
 
         DB::beginTransaction();
         try {
 
-            $profile->update([
-                'profile_tax' => isset($request->profile_tax) ? $request->profile_tax : $profile->profile_tax,
-                'remark' => isset($request->profile_remark) ? $request->profile_remark : $profile->remark,
-                'status' => isset($request->status) ? $request->status : $profile->status,
+            $user->update([
+                'password' => isset($request->password) ? Hash::make($request->password) : $user->password,
+                'firstname' => isset($request->firstname) ? $request->firstname : $user->firstname,
+                'lastname' => isset($request->lastname) ? $request->lastname : $user->lastname,
+                'comp_tax' => isset($request->comp_tax) ? $request->comp_tax : $user->comp_tax,
+                'email' => isset($request->email) ? $request->email : $user->email,
+                'status' => isset($request->status) ? $request->status : $user->status,
+                'remark' => isset($request->remark) ? $request->remark : $user->remark,
             ]);
-            
+
+            $user = User::find($user->id);
+            $user->syncPermissions([]);
+            $user->syncPermissions($request->service);
+
             DB::commit();
-            
+
             return response()->json([
                 'status' => Status::Active->value,
                 'message' => 'update success',
@@ -105,7 +123,7 @@ class ProfileController extends Controller
             DB::rollBack();
             return response()->json([
                 'status' => Status::InActive->value,
-                'message' => 'Error updating profile',
+                'message' => 'Error updating user',
                 'description' => $e->getMessage()
             ], 200);
         }
@@ -113,19 +131,20 @@ class ProfileController extends Controller
 
     public function destroy(Request $request)
     {
-        $profile = Profile::where('profile_id', $request->profile_id)
+        $user = User::where('username', $request->username)
+            ->Where('profile_id', $request->profile_id)
             ->first();
 
-        if (!$profile) {
+        if (!$user) {
             return response()->json([
                 'status' => Status::InActive->value,
-                'message' => 'Cannot delete profile. Please check profile id or profile tax',
+                'message' => 'Cannot delete user. Please check user username or profile id',
             ], 200);
         }
 
         DB::beginTransaction();
         try {
-            $profile->delete();
+            $user->delete();
             DB::commit();
             return response()->json([
                 'status' => Status::Active->value,
@@ -135,7 +154,7 @@ class ProfileController extends Controller
             DB::rollBack();
             return response()->json([
                 'status' => Status::InActive->value,
-                'message' => 'Error deleting profile',
+                'message' => 'Error deleting user',
                 'description' => $e->getMessage()
             ], 200);
         }
