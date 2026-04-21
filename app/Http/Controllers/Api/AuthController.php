@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Models\ApplicationPartner;
 use App\Enums\Status;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -91,4 +93,43 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logged out successfully']);
     }
+
+
+
+    public function checkLogin(Request $request)
+    {
+
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required',
+            'profile_id' => 'required',
+        ]);
+
+
+        if (Auth::attempt([
+            'username' => $request['username'], 
+            'password' => $request['password'], 
+            'profile_id' => $request['profile_id'],
+            'status' => Status::Active->value
+        ])) {
+            $user = Auth::user();
+            // $token = $user->createToken('Token Passport')->plainTextToken;
+            $token = Hash::make(Str::random(125));
+            
+            $user->temporary_token = $token;
+            $user->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'verify successful',
+                'access_token' => $token,
+            ]);
+        }
+            
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Username หรือ Password ไม่ถูกต้อง'
+        ], 401);
+    }
+
 }
