@@ -1,0 +1,622 @@
+{
+  "info": {
+    "_postman_id": "99aa8b69-05ae-4dba-8014-59624d7a22c9",
+    "name": "Print Form BackEnd API Specifiction",
+    "description": "**Authorization Detail**\n\nAuth Type : Bearer\n\nเมื่อ Token หมดอายุ Application ที่เชื่อมต่อเข้ามาจะทราบและต้องดำเนินการตามขั้นตอนดังนี้\n\n### 1\\. จะรู้ได้อย่างไรว่า Token หมดอายุ?\n\nเมื่อ Application ยิง Request เข้ามาพร้อมกับ Token ที่หมดอายุแล้ว Backend จะตรวจสอบและปฏิเสธ Request นั้นทันที โดยจะส่ง Response กลับไปเป็น:\n\n- **HTTP Status Code:** `401 Unauthorized`\n    \n- **Body (JSON):**\n    \n\n{  \n\"status\": 0,  \n\"message\": \"Token Expired or Invalid (Please Login)\"  \n}\n\nดังนั้น Application ฝั่งลูกข่ายต้องเขียนโค้ดเพื่อ **\"ดักจับ (Catch)\"** Error Code **401**\n\n---\n\n### 2\\. ต้องเชื่อมต่อใหม่ (Reconnect) อย่างไร?\n\nในระบบเมื่อ Token หมดอายุ (Expired) **Token นั้นจะใช้การไม่ได้อีกเลย** (รวมถึงใช้ยิงไปที่ Route api/application/refreshToken ก็ไม่ได้ด้วย เพราะ Route นั้นก็ต้องใช้ Token ที่ยังไม่หมดอายุในการผ่านเข้าไป)\n\nดังนั้น วิธีที่ถูกต้องที่สุดสำหรับ **Application-to-Application** (Server-to-Server) คือการ **\"Login ใหม่ทันที\"** โดยใช้ app_code และ Token ของ Application ที่มีสิทิ์เข้ามา\n\n**Flow การทำงานที่แนะนำ (Best Practice):**\n\n1. Application ยิง API ปกติ (เช่น `/api/user`)\n    \n2. ได้รับ **401 Unauthorized** (แปลว่า Token หมดอายุ)\n    \n3. Application ทำการเรียก api/application/login อัตโนมัติ (Background Process) ด้วย app_code และ token เดิม\n    \n4. ได้รับ **Access Token ก้อนใหม่**\n    \n5. Application ทำการ **ยิง API เดิมซ้ำอีกครั้ง (Retry)** ด้วย Token ใหม่",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "4392722",
+    "_collection_link": "https://go.postman.co/collection/4392722-99aa8b69-05ae-4dba-8014-59624d7a22c9?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "application login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseData = \"\";\r",
+                  "\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.collectionVariables.set(\"token\", \"\");\r",
+                  "    if(pm.expect(pm.response.code).to.eql(200)){\r",
+                  "        responseData = pm.response.json();\r",
+                  "        pm.collectionVariables.set(\"token\", responseData.access_token);\r",
+                  "        pm.environment.set('token', responseData.access_token);\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"app_code\": \"ABCD\",\r\n  \"token\": \"$2y$12$6msYbGZ6le9i50OQ6TNEH.KiixbPG2R/U7L9AINRKmxhVVAZNgxBm\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{enviroment}}/api/application/login",
+              "host": [
+                "{{enviroment}}"
+              ],
+              "path": [
+                "api",
+                "application",
+                "login"
+              ]
+            },
+            "description": "Request Body\n\n``` json\n{\n  \"app_code\": aplication Code, => [Required field]\n  \"token\": Applicaton Token => [Required field]\n}\n\n ```\n\nResponse Body\n\n``` json\n{\n    \"status\": Status Code (0 = Fail / 1 = Success),\n    \"message\": Messages,\n    \"application_name\": App name,\n    \"access_token\": access token,\n    \"token_type\": Auth Type,\n    \"expires_in\": token expiry time\n}\n\n ```\n\nExample Response Success\n\n``` json\n{\n    \"status\": 1,\n    \"message\": \"Login success\",\n    \"application_name\": \"app test\",\n    \"access_token\": \"38|Ea94mX6BKDxT8RIgwmr8a41pUoqbnK2TXhclUTx2753c9f23\",\n    \"token_type\": \"Bearer\",\n    \"expires_in\": \"2 minutes\"\n}\n\n ```"
+          },
+          "response": []
+        },
+        {
+          "name": "application refresh token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseData = \"\";\r",
+                  "\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.collectionVariables.set(\"token\", \"\");\r",
+                  "    if(pm.expect(pm.response.code).to.eql(200)){\r",
+                  "        responseData = pm.response.json();\r",
+                  "        pm.collectionVariables.set(\"token\", responseData.access_token);\r",
+                  "        pm.environment.set('token', responseData.access_token);\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{enviroment}}/api/application/refreshToken",
+              "host": [
+                "{{enviroment}}"
+              ],
+              "path": [
+                "api",
+                "application",
+                "refreshToken"
+              ]
+            },
+            "description": "- ไม่มี request body\n    \n- ส่งแค่ Authorization Header : Bearer access token ที่ใช้ปัจจุบัน (ที่ยังไม่หมดอายุ)\n    \n- ตัวอย่าง \" Bearer 38|Ea94mX6BKDxT8RIgwmr8a41pUoqbnK2TXhclUTx2753c9f23 \""
+          },
+          "response": []
+        },
+        {
+          "name": "logout",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{enviroment}}/api/application/logout",
+              "host": [
+                "{{enviroment}}"
+              ],
+              "path": [
+                "api",
+                "application",
+                "logout"
+              ]
+            },
+            "description": "- ไม่มี request body\n    \n- ส่งแค่ Authorization Header : Bearer access token ที่ใช้ปัจจุบัน (ที่ยังไม่หมดอายุ)\n    \n- ตัวอย่าง \" Bearer 38|Ea94mX6BKDxT8RIgwmr8a41pUoqbnK2TXhclUTx2753c9f23 \""
+          },
+          "response": []
+        }
+      ],
+      "description": "ส่วนการจัดการ login, logout, refresh token สำหรับ application ที่ต้องการเข้ามาเชื่อมต่อกับระบบ backend"
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "CreateProfile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"profile_id\": \"DCA1\",\r\n    \"profile_tax\": \"0115535000191\",\r\n    \"profile_remark\":\"test Remark\",\r\n    \"status\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{enviroment}}/api/application/profile/create",
+              "host": [
+                "{{enviroment}}"
+              ],
+              "path": [
+                "api",
+                "application",
+                "profile",
+                "create"
+              ]
+            },
+            "description": "Request Body\n\n``` json\n{\n  \"profile_id\": Profile ID, => [Required field]\n  \"profile_tax\": Profile Tax, => [Required field]\n  \"profile_remark\": Remark, \n  \"status\": Status Code (0 = In Active/ 1 = Active), => [Required field]\n}\n\n ```\n\nResponse Body\n\n``` json\n{\n    \"status\": Status Code (0 = Fail / 1 = Success),\n    \"message\": Messages,\n    \"profile\": {\n        \"profile_id\": Profile ID,\n        \"profile_tax\": Profile Tax,\n        \"status\": Status Code (0 = In Active/ 1 = Active),\n        \"remark\": Remark,\n        \"created_at\": Date Create,\n        \"updated_at\": Date Update,\n        \"id\": ID\n    }\n}\n\n ```\n\nExample Response Success\n\n``` json\n{\n    \"status\": 1,\n    \"message\": \"create success\",\n    \"profile\": {\n        \"profile_id\": \"DCA9\",\n        \"profile_tax\": \"0115535000199\",\n        \"status\": 1,\n        \"remark\": \"test Remark\",\n        \"created_at\": \"2026-01-19T01:30:19.000000Z\",\n        \"updated_at\": \"2026-01-19T01:30:19.000000Z\",\n        \"id\": 13\n    }\n}\n\n ```\n\nExample Response Error\n\n``` json\n{\n    \"status\": 0,\n    \"message\": \"Profile or Tax already exists\"\n}\n\n ```"
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateProfile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"profile_id\": \"DCP7\",\r\n    \"profile_tax\": \"0115535000691\",\r\n    \"profile_remark\":\"test update Remark\",\r\n    \"status\": 0\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{enviroment}}/api/application/profile/update",
+              "host": [
+                "{{enviroment}}"
+              ],
+              "path": [
+                "api",
+                "application",
+                "profile",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DeleteProfile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"profile_id\": \"DCP1\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{enviroment}}/api/application/profile/delete",
+              "host": [
+                "{{enviroment}}"
+              ],
+              "path": [
+                "api",
+                "application",
+                "profile",
+                "delete"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAllProfiles",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{enviroment}}/api/application/profile/getAllProfiles",
+              "host": [
+                "{{enviroment}}"
+              ],
+              "path": [
+                "api",
+                "application",
+                "profile",
+                "getAllProfiles"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "CreateUser",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"ton\",\r\n    \"password\": \"123456\",\r\n    \"firstname\": \"tonfirst\",\r\n    \"lastname\": \"tonlast\",\r\n    \"email\": \"x\",\r\n    \"comp_tax\": \"01155350006911\",\r\n    \"profile_id\": \"DCPM\",\r\n    \"status\": 1,\r\n    \"remark\":\"Test Remark\",\r\n    \"service\": [\r\n        {\r\n            \"ExDeclaration\": [\r\n                \"AddExDeclaration\",\r\n                \"EditExDeclaration\",\r\n                \"ViewExDeclaration\",\r\n                \"DelExDeclaration\"\r\n            ]\r\n        },\r\n        {\r\n            \"ImDeclaration\": [\r\n                \"AddImDeclaration\",\r\n                \"EditImDeclaration\",\r\n                \"ViewImDeclaration\",\r\n                \"DelImDeclaration\"\r\n            ]\r\n        },\r\n        {\r\n            \"PinkForm\": [\r\n                \"AddPinkForm\",\r\n                \"EditPinkForm\",\r\n                \"ViewPinkForm\",\r\n                \"DelPinkForm\"\r\n            ]\r\n        },\r\n        {\r\n            \"EManifest\": [\r\n                \"AddEManifest\",\r\n                \"EditEManifest\",\r\n                \"ViewEManifest\",\r\n                \"DelEManifest\"\r\n            ]\r\n        },\r\n        {\r\n            \"ETransit\": [\r\n                \"AddETransit\",\r\n                \"EditETransit\",\r\n                \"ViewETransit\",\r\n                \"DelETransit\"\r\n            ]\r\n        }\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{enviroment}}/api/application/user/create",
+              "host": [
+                "{{enviroment}}"
+              ],
+              "path": [
+                "api",
+                "application",
+                "user",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateUser",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"ton2\",\r\n    \"profile_id\": \"DCPB\",\r\n    \"password\": \"123456\",\r\n    \"firstname\": \"tonfirst\",\r\n    \"lastname\": \"tonlast\",\r\n    \"email\": \"Y\",\r\n    \"comp_tax\": \"01155350006911\",\r\n    \"status\": 1,\r\n    \"remark\":\"Test Remark\",\r\n    \"service\": [\r\n        {\r\n            \"ImDeclaration\": [\r\n                \"AddImDeclaration\",\r\n                \"EditImDeclaration\",\r\n                \"ViewImDeclaration\",\r\n                \"DelImDeclaration\"\r\n            ]\r\n        },\r\n        {\r\n            \"PinkForm\": [\r\n                \"AddPinkForm\",\r\n                \"EditPinkForm\",\r\n                \"ViewPinkForm\",\r\n                \"DelPinkForm\"\r\n            ]\r\n        },\r\n        {\r\n            \"EManifest\": [\r\n                \"AddEManifest\",\r\n                \"EditEManifest\",\r\n                \"ViewEManifest\",\r\n                \"DelEManifest\"\r\n            ]\r\n        },\r\n        {\r\n            \"ETransit\": [\r\n                \"AddETransit\",\r\n                \"EditETransit\",\r\n                \"ViewETransit\",\r\n                \"DelETransit\"\r\n            ]\r\n        }\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{enviroment}}/api/application/user/update",
+              "host": [
+                "{{enviroment}}"
+              ],
+              "path": [
+                "api",
+                "application",
+                "user",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DeleteUser",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"profile_id\": \"DCPM\",\r\n  \"username\": \"ton\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{enviroment}}/api/application/user/delete",
+              "host": [
+                "{{enviroment}}"
+              ],
+              "path": [
+                "api",
+                "application",
+                "user",
+                "delete"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAllUsers",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{enviroment}}/api/application/user/getAllUsers",
+              "host": [
+                "{{enviroment}}"
+              ],
+              "path": [
+                "api",
+                "application",
+                "user",
+                "getAllUsers"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Test",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{enviroment}}/api/application/test",
+          "host": [
+            "{{enviroment}}"
+          ],
+          "path": [
+            "api",
+            "application",
+            "test"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GenerateToken",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{enviroment}}/api/application/generateToken",
+          "host": [
+            "{{enviroment}}"
+          ],
+          "path": [
+            "api",
+            "application",
+            "generateToken"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"username\": \"admin\",\r\n  \"password\": \"e10adc3949ba59abbe56e057f20f883e\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost/api/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GenTokenFree",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"value\": 123456\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{enviroment}}/api/application/freeToken",
+          "host": [
+            "{{enviroment}}"
+          ],
+          "path": [
+            "api",
+            "application",
+            "freeToken"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}

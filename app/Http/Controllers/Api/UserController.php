@@ -53,12 +53,17 @@ class UserController extends Controller
                 'comp_tax' => $request->comp_tax,
                 'profile_id' => $request->profile_id,
                 'status' => $request->status ?? Status::Active->value,
+                'lsp_tax_no' => $request->lsp_tax_no ?? "",
+                'lsp_comp_nmt' => $request->lsp_comp_nmt ?? "",
+                'lsp' => $request->lsp ?? "",
                 'remark' => $request->remark ?? "",
             ]);
 
             $user = User::find($user->id);
-            $user->syncPermissions([]);
-            $user->syncPermissions($request->service);
+            // $user->syncPermissions([]);
+            // $user->syncPermissions($request->service);
+            $permissions = collect($request->service)->flatten()->toArray();
+            $user->syncPermissions($permissions);
 
             DB::commit();
 
@@ -105,12 +110,17 @@ class UserController extends Controller
                 'comp_tax' => isset($request->comp_tax) ? $request->comp_tax : $user->comp_tax,
                 'email' => isset($request->email) ? $request->email : $user->email,
                 'status' => isset($request->status) ? $request->status : $user->status,
+                'lsp_tax_no' => isset($request->lsp_tax_no) ? $request->lsp_tax_no : $user->lsp_tax_no,
+                'lsp_comp_nmt' => isset($request->lsp_comp_nmt) ? $request->lsp_comp_nmt : $user->lsp_comp_nmt,
+                'lsp' => isset($request->lsp) ? $request->lsp : $user->lsp,
                 'remark' => isset($request->remark) ? $request->remark : $user->remark,
             ]);
 
             $user = User::find($user->id);
-            $user->syncPermissions([]);
-            $user->syncPermissions($request->service);
+            // $user->syncPermissions([]);
+            // $user->syncPermissions($request->service);
+            $permissions = collect($request->service)->flatten()->toArray();
+            $user->syncPermissions($permissions);
 
             DB::commit();
 

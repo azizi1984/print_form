@@ -1,5 +1,6 @@
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import "bootstrap-icons/font/bootstrap-icons.css";
+@import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
 
 :root {
     --primary-color: #556ee6;
@@ -511,4 +512,15 @@ body.login-page main {
 .login-container {
     width: 100%;
     padding-bottom: 50px;
+}
+
+/* --- DataTables Custom Styles --- */
+.dt-container .pagination,
+.dataTables_wrapper .pagination {
+    font-size: 0.85rem; /* ลดขนาดตัวอักษรลง */
+}
+
+.dt-container .pagination .page-link,
+.dataTables_wrapper .pagination .page-link {
+    padding: 0.3rem 0.6rem; /* บีบขนาดกล่องปุ่มลงเล็กน้อยให้พอดีกับฟอนต์ */
 }

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\UserController;
 
 Route::post('application/login', [AuthController::class, 'login']);
+Route::post('application/checkLogin', [AuthController::class, 'checkLogin']);
 
 
 Route::middleware('auth:sanctum')->group(function () {

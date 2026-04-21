@@ -34,6 +34,10 @@
                                             </div>
                                         @enderror
                                         <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="profile_id" name="profile_id" placeholder="Profile ID" required>
+                                            <label for="profile_id">Profile ID</label>
+                                        </div>
+                                        <div class="form-floating mb-3">
                                             <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
                                             <label for="username">Username</label>
                                         </div>

@@ -5,16 +5,23 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: [
+                'resources/css/app.css',
+                'resources/js/app.js',
+                'resources/js/ex_declaration/script.js'
+            ],
             refresh: true,
         }),
         tailwindcss(),
     ],
     server: {
-        host: '0.0.0.0', // ฟังทุก IP
-        port: 5173,      // Port มาตรฐานของ Vite
+        host: '0.0.0.0',
+        port: 5173,
         hmr: {
-            host: 'localhost', // บอกเบราว์เซอร์ให้เชื่อมต่อกลับมาที่ localhost
+            host: 'localhost',
+        },
+        watch: {
+            usePolling: true,
         },
     },
 });
