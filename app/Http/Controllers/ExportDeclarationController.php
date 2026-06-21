@@ -11,8 +11,8 @@ class ExportDeclarationController extends Controller
 {
     public function index()
     {
-        $profileTemplates = ProfileTemplate::where('profile_id', Auth::user()->profile_id)->get();
-        return view('ex_declaration.index', compact('profileTemplates'));
+        $profileTemplates = ProfileTemplate::whereIn('profile_id', [Auth::user()->profile_id, 'ZZ00'])->get();
+        return view('ex_declaration.profile_templates.index', compact('profileTemplates'));
     }
 
     // public function create()

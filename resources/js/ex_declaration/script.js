@@ -4,14 +4,10 @@ import 'datatables.net-bs5';
 // Assign jQuery to window globally
 window.$ = window.jQuery = jQuery;
 
-// console.log("🚀 Script.js loaded! Checking if table exists...");
-
 jQuery(function ($) {
     var tableEl = $('#ex_declaration');
-    // console.log("🔍 Table element found: ", tableEl.length > 0);
 
     if (tableEl.length > 0) {
-        // console.log("⚙️ Initializing DataTables...");
         tableEl.DataTable({
             pageLength: 10,
             lengthMenu: [[10, 50, 100], [10, 50, 100]],
@@ -31,25 +27,21 @@ jQuery(function ($) {
                 }
             }
         });
-        console.log("✅ DataTables initialized completely.");
     }
 
     // จัดการ Event เมื่อเปิด Modal Edit
     const createOrEditModal = document.getElementById('createOrEditModal');
     if (createOrEditModal) {
         createOrEditModal.addEventListener('show.bs.modal', function (event) {
-            // ปุ่มคล้ายดินสอที่ผู้ใช้กดคลิก
             const button = event.relatedTarget;
 
             if (button) {
-                // ดึงข้อมูลจาก Data Attributes ในปุ่ม
                 const id = button.getAttribute('data-id');
                 const name = button.getAttribute('data-name');
                 const desc = button.getAttribute('data-desc');
                 const status = button.getAttribute('data-status');
                 const date = button.getAttribute('data-date');
 
-                // นำไปใส่ใน Input ต่างๆ ของฟอร์ม
                 document.getElementById('create_or_edit_profile_template_id').value = id || '';
                 document.getElementById('create_or_edit_profile_template_name').value = name || '';
                 document.getElementById('create_or_edit_description').value = desc || '';
@@ -67,7 +59,6 @@ jQuery(function ($) {
                     document.getElementById('editModalLabel').innerHTML = '<i class="bi bi-plus-lg me-2"></i>Create Template';
                     document.getElementById('wrapper_created_at').style.display = 'none';
                     document.getElementById('createOrEditForm').reset();
-                    // บังคับค่าพื้นฐานในโหมดสร้างใหม่
                     document.getElementById('create_or_edit_profile_template_id').value = '';
                     document.getElementById('create_or_edit_status').value = 0;
                 }
@@ -95,15 +86,14 @@ jQuery(function ($) {
                     return;
                 }
 
-                let url = '/ex-declaration';
+                let url = '/ex-declaration/profile-template';
                 let method = 'POST';
 
                 if (mode === 'edit' && id) {
-                    url = `/ex-declaration/${id}`;
+                    url = `/ex-declaration/profile-template/${id}`;
                     method = 'PUT';
                 }
 
-                // ป้องกันกดย้ำ
                 const originalHtml = btnSave.innerHTML;
                 btnSave.disabled = true;
                 btnSave.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...';
@@ -120,7 +110,7 @@ jQuery(function ($) {
                     },
                     success: function (res) {
                         alert('Save successfully!');
-                        location.reload(); // รีโหลดหน้าเพื่อดึงข้อมูลใหม่
+                        location.reload();
                     },
                     error: function (xhr) {
                         alert('Failed to save data. Please try again.');
@@ -147,7 +137,7 @@ jQuery(function ($) {
             btn.css('pointer-events', 'none');
 
             $.ajax({
-                url: `/ex-declaration/${id}`,
+                url: `/ex-declaration/profile-template/${id}`,
                 type: 'POST',
                 data: {
                     _method: 'DELETE',
@@ -168,5 +158,4 @@ jQuery(function ($) {
             });
         }
     });
-
 });

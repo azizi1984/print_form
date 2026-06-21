@@ -12,7 +12,7 @@
     <!-- Using include instead of extends for the topbar component -->
     @include('layouts.topbar')
     
-    <div class="container mt-4 mb-5">
+    <div class="container-fluid px-4 mt-4 mb-5">
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 fw-bold"><i class="bi bi-file-earmark-arrow-up me-2"></i>Export Declaration Profiles</h5>
