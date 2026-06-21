@@ -5,6 +5,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ExportDeclarationController;
+use App\Http\Controllers\HeaderTemplateController;
+use App\Http\Controllers\DetailTemplateController;
+use App\Http\Controllers\FooterTemplateController;
 
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -24,15 +27,45 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return view('index');
     })->name('dashboard');
+    Route::prefix('ex-declaration')->group(function () {
+        Route::controller(ExportDeclarationController::class)->group(function () {
+            Route::get('/profile-template', 'index')->name('profile-template');
+            Route::get('/profile-template/create', 'create')->name('profile-template.create');
+            Route::post('/profile-template', 'store')->name('profile-template.store');
+            Route::get('/profile-template/{id}', 'show')->name('profile-template.show');
+            Route::get('/profile-template/{id}/edit', 'edit')->name('profile-template.edit');
+            Route::put('/profile-template/{id}', 'update')->name('profile-template.update');
+            Route::delete('/profile-template/{id}', 'destroy')->name('profile-template.destroy');
+        });
 
-    Route::controller(ExportDeclarationController::class)->group(function () {
-        Route::get('/ex-declaration', 'index')->name('ex-declaration');
-        Route::get('/ex-declaration/create', 'create')->name('ex-declaration.create');
-        Route::post('/ex-declaration', 'store')->name('ex-declaration.store');
-        Route::get('/ex-declaration/{id}', 'show')->name('ex-declaration.show');
-        Route::get('/ex-declaration/{id}/edit', 'edit')->name('ex-declaration.edit');
-        Route::put('/ex-declaration/{id}', 'update')->name('ex-declaration.update');
-        Route::delete('/ex-declaration/{id}', 'destroy')->name('ex-declaration.destroy');
+        Route::controller(HeaderTemplateController::class)->group(function () {
+            Route::get('/header-template', 'index')->name('header-template');
+            Route::get('/header-template/create', 'create')->name('header-template.create');
+            Route::post('/header-template', 'store')->name('header-template.store');
+            Route::get('/header-template/{id}', 'show')->name('header-template.show');
+            Route::get('/header-template/{id}/edit', 'edit')->name('header-template.edit');
+            Route::put('/header-template/{id}', 'update')->name('header-template.update');
+            Route::delete('/header-template/{id}', 'destroy')->name('header-template.destroy');
+        });
+
+        Route::controller(DetailTemplateController::class)->group(function () {
+            Route::get('/detail-template', 'index')->name('detail-template');
+            Route::get('/detail-template/create', 'create')->name('detail-template.create');
+            Route::post('/detail-template', 'store')->name('detail-template.store');
+            Route::get('/detail-template/{id}', 'show')->name('detail-template.show');
+            Route::get('/detail-template/{id}/edit', 'edit')->name('detail-template.edit');
+            Route::put('/detail-template/{id}', 'update')->name('detail-template.update');
+            Route::delete('/detail-template/{id}', 'destroy')->name('detail-template.destroy');
+        });
+
+        Route::controller(FooterTemplateController::class)->group(function () {
+            Route::get('/footer-template', 'index')->name('footer-template');
+            Route::get('/footer-template/create', 'create')->name('footer-template.create');
+            Route::post('/footer-template', 'store')->name('footer-template.store');
+            Route::get('/footer-template/{id}', 'show')->name('footer-template.show');
+            Route::get('/footer-template/{id}/edit', 'edit')->name('footer-template.edit');
+            Route::put('/footer-template/{id}', 'update')->name('footer-template.update');
+            Route::delete('/footer-template/{id}', 'destroy')->name('footer-template.destroy');
+        });
     });
-
 });

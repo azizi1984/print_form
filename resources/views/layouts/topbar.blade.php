@@ -60,18 +60,23 @@
 
                 <ul class="dropdown-menu" aria-labelledby="managementDropdown">
                     <li>
-                        <a class="dropdown-item" href="{{ route('ex-declaration') }}">
+                        <a class="dropdown-item" href="{{ route('profile-template') }}">
                             Profile Template
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="#">
-                            Form Template
+                        <a class="dropdown-item" href="{{ route('header-template') }}">
+                            Header Template
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="#">
-                            Form Mapping
+                        <a class="dropdown-item" href="{{ route('detail-template') }}">
+                            Detail Template
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('footer-template') }}">
+                            Footer Template
                         </a>
                     </li>
                 </ul>
