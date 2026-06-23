@@ -50,7 +50,7 @@
                                 <td>
                                     <div class="d-flex justify-content-center align-items-center flex-nowrap gap-2">
                                         <a href="{{ route('header-template.show', $row['header_template_id']) }}" class="text-primary" title="Manage"><i class="bi bi-gear"></i></a>
-                                        <a href="#" class="text-success" title="Copy"><i class="bi bi-copy"></i></a>
+                                        <a href="#" class="text-success copy-btn" title="Copy" data-id="{{ $row['header_template_id'] ?? '' }}"><i class="bi bi-copy"></i></a>
                                         <a href="#" class="text-warning" title="Edit"
                                            data-bs-toggle="modal" 
                                            data-bs-target="#createOrEditModal"

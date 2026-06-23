@@ -46,6 +46,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/header-template/{id}/edit', 'edit')->name('header-template.edit');
             Route::put('/header-template/{id}', 'update')->name('header-template.update');
             Route::delete('/header-template/{id}', 'destroy')->name('header-template.destroy');
+            Route::post('/header-template/{id}/copy', 'copy')->name('header-template.copy');
         });
 
         Route::controller(DetailTemplateController::class)->group(function () {

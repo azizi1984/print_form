@@ -123,6 +123,48 @@ jQuery(function ($) {
         }
     }
 
+    // จัดการ Event เมื่อกดปุ่ม Copy
+    $('#header_declaration tbody').on('click', '.copy-btn', function (e) {
+        e.preventDefault();
+        const id = $(this).attr('data-id');
+
+        if (!id) return;
+
+        if (confirm('Are you sure you want to duplicate this template?')) {
+            const btn = $(this);
+            const originalHtml = btn.html();
+            btn.html('<span class="spinner-border spinner-border-sm text-success" role="status" aria-hidden="true"></span>');
+            btn.css('pointer-events', 'none');
+
+            $.ajax({
+                url: `/ex-declaration/header-template/${id}/copy`,
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (res) {
+                    if (res.success) {
+                        alert('Copied successfully!');
+                        location.reload();
+                    } else {
+                        alert('Failed to copy: ' + res.message);
+                        btn.html(originalHtml);
+                        btn.css('pointer-events', 'auto');
+                    }
+                },
+                error: function (xhr) {
+                    const errMsg = (xhr.responseJSON && xhr.responseJSON.message) 
+                        ? xhr.responseJSON.message 
+                        : (xhr.statusText || 'Unknown error');
+                    alert('Failed to copy data: ' + errMsg);
+                    console.error(xhr.responseText);
+                    btn.html(originalHtml);
+                    btn.css('pointer-events', 'auto');
+                }
+            });
+        }
+    });
+
     // จัดการ Event เมื่อกดปุ่ม Delete (Trash)
     $('#header_declaration tbody').on('click', '.delete-btn', function (e) {
         e.preventDefault();
@@ -150,7 +192,10 @@ jQuery(function ($) {
                     }
                 },
                 error: function (xhr) {
-                    alert('Failed to delete data. Please try again.');
+                    const errMsg = (xhr.responseJSON && xhr.responseJSON.message) 
+                        ? xhr.responseJSON.message 
+                        : (xhr.statusText || 'Unknown error');
+                    alert('Failed to delete data: ' + errMsg);
                     console.error(xhr.responseText);
                     btn.html(originalHtml);
                     btn.css('pointer-events', 'auto');
