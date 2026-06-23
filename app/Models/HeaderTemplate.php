@@ -21,4 +21,9 @@ class HeaderTemplate extends Model
         'updated_by',
         'deleted_by',
     ];
+
+    public function items()
+    {
+        return $this->hasMany(HeaderTemplateItem::class, 'header_template_id', 'header_template_id');
+    }
 }
