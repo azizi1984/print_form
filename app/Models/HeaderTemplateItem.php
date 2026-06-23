@@ -12,6 +12,7 @@ class HeaderTemplateItem extends Model
         'header_template_id',
         'cell_id',
         'field_name',
+        'custom_text',
         'seq',
     ];
 
