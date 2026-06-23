@@ -27,7 +27,8 @@ class HeaderTemplateController extends Controller
         foreach ($headerTemplate->items as $item) {
             $layoutConfig[$item->cell_id][] = [
                 'fieldId' => $item->field_name,
-                'fieldName' => $item->field_name
+                'fieldName' => $item->field_name,
+                'customText' => $item->custom_text
             ];
         }
 
@@ -101,6 +102,7 @@ class HeaderTemplateController extends Controller
                                     'header_template_id' => $headerTemplate->header_template_id,
                                     'cell_id' => $cellId,
                                     'field_name' => $fieldData['fieldId'],
+                                    'custom_text' => $fieldData['customText'] ?? null,
                                     'seq' => $index + 1,
                                     'created_at' => now(),
                                     'updated_at' => now()
@@ -167,6 +169,7 @@ class HeaderTemplateController extends Controller
                     'header_template_id' => $newTemplate->header_template_id,
                     'cell_id' => $item->cell_id,
                     'field_name' => $item->field_name,
+                    'custom_text' => $item->custom_text,
                     'seq' => $item->seq,
                     'created_at' => now(),
                     'updated_at' => now()

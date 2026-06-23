@@ -718,6 +718,15 @@
                 </div>
                 
                 <div class="field-list">
+                    <!-- Special Custom Text Field -->
+                    <div class="field-item" data-field="custom_text" draggable="true" style="background-color: #fff3cd; border-color: #ffe69c;">
+                        <span>
+                            <i class="bi bi-fonts me-2 text-warning"></i>
+                            <strong>Custom Text (ข้อความทั่วไป)</strong>
+                        </span>
+                        <i class="bi bi-plus-circle text-warning"></i>
+                    </div>
+
                     @foreach($fields as $field)
                         <div class="field-item" data-field="{{ $field->field_name }}" draggable="true">
                             <span>
@@ -769,6 +778,20 @@
                     
                     <!-- Modal Fields List -->
                     <div class="modal-field-list" style="max-height: 380px; overflow-y: auto;">
+                        <!-- Special Custom Text Field -->
+                        <div class="modal-field-item p-2 mb-2 border rounded d-flex justify-content-between align-items-center" 
+                             data-field="custom_text" 
+                             data-label="Custom Text (ข้อความทั่วไป)"
+                             style="cursor: pointer; font-size: 12.5px; transition: all 0.2s; background-color: #fff3cd; border-color: #ffe69c;">
+                            <span class="field-label-text">
+                                <i class="bi bi-fonts me-2 text-warning"></i>
+                                <strong>Custom Text (ข้อความทั่วไป)</strong>
+                            </span>
+                            <button type="button" class="btn btn-warning btn-sm px-2 py-1 select-field-btn" style="font-size: 11px; border-radius: 4px;">
+                                <i class="bi bi-plus-circle me-1"></i> Add
+                            </button>
+                        </div>
+
                         @foreach($fields as $field)
                             @php
                                 $displayLabel = (!empty($field->app_showe) && !empty($field->app_showt)) 
@@ -839,7 +862,10 @@
             };
 
             // Helper to get display label (app_showt) for a field
-            function getFieldDisplayLabel(fieldId, fallbackLabel) {
+            function getFieldDisplayLabel(fieldId, fallbackLabel, customText) {
+                if (fieldId === 'custom_text') {
+                    return `Custom Text: ${customText || ''}`;
+                }
                 if (fieldsMap[fieldId]) {
                     return fieldsMap[fieldId].app_showt;
                 }
@@ -898,16 +924,30 @@
                     savedLayout[cellId] = [];
                 }
 
-                // Check if already contains this field to prevent duplicates
-                const exists = savedLayout[cellId].some(item => item.fieldId === fieldId);
-                if (exists) {
-                    alert('ฟิลด์นี้ถูกเลือกในช่องนี้แล้ว');
-                    return;
+                let customTextVal = null;
+                if (fieldId === 'custom_text') {
+                    customTextVal = prompt("กรุณาระบุข้อความทั่วไป (Custom Text):");
+                    if (customTextVal === null) {
+                        return; // user cancelled
+                    }
+                    if (customTextVal.trim() === '') {
+                        alert("ข้อความต้องไม่เป็นค่าว่าง");
+                        return;
+                    }
+                    customTextVal = customTextVal.trim();
+                } else {
+                    // Check if already contains this field to prevent duplicates
+                    const exists = savedLayout[cellId].some(item => item.fieldId === fieldId);
+                    if (exists) {
+                        alert('ฟิลด์นี้ถูกเลือกในช่องนี้แล้ว');
+                        return;
+                    }
                 }
 
                 savedLayout[cellId].push({
                     fieldId: fieldId,
-                    fieldName: fieldLabel
+                    fieldName: fieldId === 'custom_text' ? `Custom Text: ${customTextVal}` : fieldLabel,
+                    customText: customTextVal
                 });
 
                 renderCellFields(cellEl);
@@ -931,10 +971,12 @@
 
                 let html = '<div class="cell-fields-list d-flex flex-wrap align-items-center justify-content-center gap-1" style="pointer-events: auto;">';
                 fieldsList.forEach((field, index) => {
-                    const displayLabel = getFieldDisplayLabel(field.fieldId, field.fieldName);
+                    const displayLabel = getFieldDisplayLabel(field.fieldId, field.fieldName, field.customText);
+                    const badgeClass = field.fieldId === 'custom_text' ? 'tp-badge bg-warning border-warning text-dark' : 'tp-badge';
+                    const badgeStyle = field.fieldId === 'custom_text' ? 'color: #000 !important;' : '';
                     html += `
-                        <span class="tp-badge" data-field-id="${field.fieldId}">
-                            <span class="tp-badge-label" title="${displayLabel}" style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle;">${displayLabel}</span>
+                        <span class="${badgeClass}" data-field-id="${field.fieldId}" style="${badgeStyle}">
+                            <span class="tp-badge-label" title="${displayLabel}" style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; ${badgeStyle}">${displayLabel}</span>
                             <i class="bi bi-x-circle-fill tp-badge-delete" data-index="${index}" title="Remove field"></i>
                         </span>
                     `;
