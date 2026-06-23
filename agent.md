@@ -109,5 +109,6 @@ When asked to implement new features or modify existing code:
 2. **Reuse Layouts:** Do not write boilerplate HTML. Use layout templates like `layouts.admin` or include UI components like `layouts.topbar` directly.
 3. **Validate Database Types:** Note that some models (e.g. `ProfileTemplate`) use string UUIDs or custom string IDs as primary keys (`profile_template_id`), while others use standard auto-incrementing integers. Always check the primary keys configuration in the Model files before writing database queries.
 4. **Preserve Code Style:** Do not remove user-written comments or alter unrelated configurations. Use clean and well-commented code, referencing context files where applicable.
-5. **No Automatic Commits or Pushes:** Do NOT perform `git commit` or `git push` operations automatically unless explicitly requested by the user.
+5. **Git Commit & Push Guidelines:** Do NOT perform `git commit` or `git push` operations automatically unless explicitly requested by the user. When the user requests a git commit and git push, always split the commits separately by function or module (แยก commit ตาม function หรือ Module ทุกครั้งที่มีการสั่ง git commit และ git push).
+6. **Language for Documentation and Plans:** Always write implementation plans (`implementation_plan.md`), walkthroughs (`walkthrough.md`), and work summaries in Thai language (ภาษาไทย).
 
