@@ -49,8 +49,8 @@
                                 </td>
                                 <td>
                                     <div class="d-flex justify-content-center align-items-center flex-nowrap gap-2">
-                                        <a href="#" class="text-primary" title="Manage"><i class="bi bi-gear"></i></a>
-                                        <a href="#" class="text-success" title="Copy"><i class="bi bi-copy"></i></a>
+                                        <a href="{{ route('detail-template.show', $row['detail_template_id']) }}" class="text-primary" title="Manage"><i class="bi bi-gear"></i></a>
+                                        <a href="#" class="text-success copy-btn" title="Copy" data-id="{{ $row['detail_template_id'] ?? '' }}"><i class="bi bi-copy"></i></a>
                                         <a href="#" class="text-warning" title="Edit"
                                            data-bs-toggle="modal" 
                                            data-bs-target="#createOrEditModal"

@@ -21,4 +21,9 @@ class DetailTemplate extends Model
         'updated_by',
         'deleted_by',
     ];
+
+    public function items()
+    {
+        return $this->hasMany(DetailTemplateItem::class, 'detail_template_id', 'detail_template_id');
+    }
 }
