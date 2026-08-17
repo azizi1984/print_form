@@ -8,9 +8,11 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="@yield('body-class')">
-    @extends('layouts.topbar')
-    @yield('content')
+<body class="@yield('body-class', 'bg-light')">
+    @include('layouts.topbar')
 
+    <div class="container-fluid px-4 py-4">
+        @yield('content')
+    </div>
 </body>
 </html>

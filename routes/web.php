@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ExportDeclarationController;
 use App\Http\Controllers\HeaderTemplateController;
 use App\Http\Controllers\DetailTemplateController;
@@ -20,9 +21,10 @@ Route::get('/print-form', function () {
     return view('form.form');
 });
 
-Route::resource('roles', RoleController::class);
-
 Route::middleware(['auth'])->group(function () {
+    Route::resource('roles', RoleController::class);
+    Route::resource('permissions', PermissionController::class);
+    Route::resource('users', UserController::class);
     // dashboard
     Route::get('/dashboard', function () {
         return view('index');
@@ -57,6 +59,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/detail-template/{id}/edit', 'edit')->name('detail-template.edit');
             Route::put('/detail-template/{id}', 'update')->name('detail-template.update');
             Route::delete('/detail-template/{id}', 'destroy')->name('detail-template.destroy');
+            Route::post('/detail-template/{id}/copy', 'copy')->name('detail-template.copy');
         });
 
         Route::controller(FooterTemplateController::class)->group(function () {

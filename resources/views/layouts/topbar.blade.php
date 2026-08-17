@@ -105,13 +105,13 @@
                 <ul class="dropdown-menu" aria-labelledby="managementDropdown">
 
                     <li>
-                        <a class="dropdown-item" href="{{ route('roles.index') }}">
+                        <a class="dropdown-item" href="{{ route('users.index') }}">
                             <i class="bi bi-people me-2 text-muted"></i> Users List
                         </a>
                     </li>
 
                     <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="{{ route('roles.index') }}">
                             <i class="bi bi-shield-lock me-2 text-muted"></i> Roles & Permissions
                         </a>
                     </li>
