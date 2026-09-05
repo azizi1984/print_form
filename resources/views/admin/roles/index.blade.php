@@ -117,12 +117,12 @@
                                     </span>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <div class="btn-group">
-                                        <a class="btn btn-sm btn-outline-primary" href="{{ route('roles.edit', $role->id) }}" title="Edit Role">
-                                            <i class="bi bi-pencil"></i> Edit
+                                    <div class="d-flex justify-content-end align-items-center gap-1">
+                                        <a class="btn-action btn-action-edit" href="{{ route('roles.edit', $role->id) }}" title="Edit Role">
+                                            <i class="bi bi-pencil"></i>
                                         </a>
                                         @if(!in_array($role->name, ['Super Admin']))
-                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteRoleModal{{ $role->id }}" title="Delete Role">
+                                            <button type="button" class="btn-action btn-action-delete" data-bs-toggle="modal" data-bs-target="#deleteRoleModal{{ $role->id }}" title="Delete Role">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         @endif

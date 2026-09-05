@@ -73,37 +73,37 @@ class UserController extends Controller
                 $usernameHtml = !empty($user->username) ? '<small class="text-muted"><i class="bi bi-at"></i>' . e($user->username) . '</small>' : '';
                 $nameHtml = '
                     <div class="d-flex align-items-center">
-                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-2 fw-bold" style="width: 32px; height: 32px; font-size: 13px;">
+                        <div class="rounded-circle d-flex justify-content-center align-items-center me-2 fw-bold text-white shadow-sm" style="width: 34px; height: 34px; font-size: 13px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
                             ' . e($initial) . '
                         </div>
                         <div>
-                            <div class="fw-bold text-dark">' . e($user->name) . '</div>
+                            <div class="fw-semibold text-dark" style="font-size: 13.5px;">' . e($user->name) . '</div>
                             ' . $usernameHtml . '
                         </div>
                     </div>';
 
                 // Email column HTML
-                $emailHtml = '<span class="text-dark"><i class="bi bi-envelope me-1 text-muted"></i>' . e($user->email) . '</span>';
+                $emailHtml = '<span class="text-secondary"><i class="bi bi-envelope me-1.5 text-muted"></i>' . e($user->email) . '</span>';
 
                 // Role column HTML
                 $roleHtml = '';
                 if ($user->roles->isNotEmpty()) {
                     foreach ($user->roles as $role) {
-                        $roleHtml .= '<span class="badge bg-info text-dark px-2 py-1 me-1"><i class="bi bi-shield-check me-1"></i>' . e($role->name) . '</span>';
+                        $roleHtml .= '<span class="badge badge-modern badge-primary-modern me-1"><i class="bi bi-shield-check me-1"></i>' . e($role->name) . '</span>';
                     }
                 } else {
-                    $roleHtml = '<span class="badge bg-secondary px-2 py-1">No Role</span>';
+                    $roleHtml = '<span class="badge bg-secondary-subtle text-secondary px-2 py-1" style="border-radius: 6px; font-size: 11.5px;">No Role</span>';
                 }
 
                 // Status column HTML
                 if (($user->status ?? 1) == 1) {
-                    $statusHtml = '<span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle me-1"></i>Active</span>';
+                    $statusHtml = '<span class="badge badge-modern badge-success-modern"><i class="bi bi-check-circle-fill me-1"></i>Active</span>';
                 } else {
-                    $statusHtml = '<span class="badge bg-danger px-2 py-1"><i class="bi bi-x-circle me-1"></i>Inactive</span>';
+                    $statusHtml = '<span class="badge badge-modern badge-danger-modern"><i class="bi bi-dash-circle-fill me-1"></i>Inactive</span>';
                 }
 
                 // Date column HTML
-                $createdAtHtml = $user->created_at ? $user->created_at->format('Y-m-d H:i') : '-';
+                $createdAtHtml = $user->created_at ? '<span class="text-muted" style="font-size: 13px;">' . $user->created_at->format('Y-m-d H:i') . '</span>' : '-';
 
                 // Action column HTML (Edit & Delete buttons)
                 $editUrl = route('users.edit', $user->id);
@@ -111,15 +111,15 @@ class UserController extends Controller
                 $csrfToken = csrf_token();
 
                 $actionHtml = '
-                    <div class="d-flex justify-content-center align-items-center gap-2">
-                        <a href="' . $editUrl . '" class="btn btn-sm btn-outline-warning" title="Edit User">
-                            <i class="bi bi-pencil-square me-1"></i>Edit
+                    <div class="d-flex justify-content-center align-items-center gap-1.5">
+                        <a href="' . $editUrl . '" class="btn-action btn-action-edit" title="แก้ไขข้อมูลผู้ใช้">
+                            <i class="bi bi-pencil-square"></i>
                         </a>
                         <form action="' . $deleteUrl . '" method="POST" class="d-inline" onsubmit="return confirm(\'คุณต้องการลบผู้ใช้งาน \\\'' . e($user->name) . '\\\' ใช่หรือไม่?\');">
                             <input type="hidden" name="_token" value="' . $csrfToken . '">
                             <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete User">
-                                <i class="bi bi-trash me-1"></i>Delete
+                            <button type="submit" class="btn-action btn-action-delete" title="ลบผู้ใช้">
+                                <i class="bi bi-trash"></i>
                             </button>
                         </form>
                     </div>';
