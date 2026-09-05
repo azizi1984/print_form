@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
@@ -10,18 +11,23 @@ use App\Http\Controllers\HeaderTemplateController;
 use App\Http\Controllers\DetailTemplateController;
 use App\Http\Controllers\FooterTemplateController;
 
-
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/redirect-login', [AuthController::class, 'autoLogin'])->name('auto-login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
-
-
-Route::get('/print-form', function () {
-    return view('form.form');
+// Default entry point: redirect to dashboard if logged in, otherwise redirect to login
+Route::get('/', function () {
+    return Auth::check() ? redirect()->route('dashboard') : redirect()->route('login');
 });
 
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+Route::post('/redirect-login', [AuthController::class, 'autoLogin'])->name('auto-login');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
 Route::middleware(['auth'])->group(function () {
+    Route::get('/print-form', function () {
+        return view('form.form');
+    });
     Route::resource('roles', RoleController::class);
     Route::resource('permissions', PermissionController::class);
     Route::resource('users', UserController::class);
