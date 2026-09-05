@@ -18,13 +18,12 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-
   web:
     image: nginx:alpine
     container_name: laravel_web
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - .:/var/www/html
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
@@ -34,17 +33,17 @@ services:
       - app
 
   vite:
-        image: node:20-alpine
-        container_name: print-form-vite
-        restart: unless-stopped
-        working_dir: /var/www/html
-        ports:
-            - "5173:5173"
-        volumes:
-            - .:/var/www/html
-        networks:
-            - laravel-net
-        command: sh -c "npm install && npm run dev"
+    image: node:20-alpine
+    container_name: print-form-vite
+    restart: unless-stopped
+    working_dir: /var/www/html
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/var/www/html
+    networks:
+      - laravel-net
+    command: sh -c "npm install && npm run dev"
 
   redis:
     image: redis:alpine
