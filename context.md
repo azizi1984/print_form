@@ -59,7 +59,7 @@ print_form/
 │       ├── auth/              # Login views
 │       ├── ex_declaration/    # Export Declaration template management UI
 │       ├── form/              # Printing form templates
-│       └── layouts/           # Master layouts (admin, app, topbar)
+│       └── layouts/           # Master layouts (app, topbar)
 ├── routes/
 │   ├── api.php                # API Routes (sanctum auth group)
 │   ├── console.php            # Console commands
@@ -144,6 +144,6 @@ Handles external system integration clients authorized to issue print requests o
 
 ### 4.3 Export Declaration Templates Management
 * Managed through the web view at `/ex-declaration` via `ExportDeclarationController`.
-* The front-end renders templates using jQuery DataTables inside `resources/views/ex_declaration/index.blade.php`.
+* The front-end renders templates using jQuery DataTables inside `resources/views/ex_declaration/profile_templates/index.blade.php`.
 * Create, Edit, and Delete actions are executed asynchronously using AJAX requests.
 * Modals are reused for both creation and editing, swapping data dynamically via HTML5 `data-*` attributes.

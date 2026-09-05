@@ -106,9 +106,17 @@ If validation or business logic fails, return standard status indicator along wi
 
 When asked to implement new features or modify existing code:
 1. **Analyze Dependencies:** Always inspect `composer.json` and `package.json` to leverage existing libraries (e.g. Sanctum, Spatie Permission) before installing new ones.
-2. **Reuse Layouts:** Do not write boilerplate HTML. Use layout templates like `layouts.admin` or include UI components like `layouts.topbar` directly.
+2. **Reuse Layouts:** Do not write boilerplate HTML. Use layout templates like `layouts.app` or include UI components like `layouts.topbar` directly.
 3. **Validate Database Types:** Note that some models (e.g. `ProfileTemplate`) use string UUIDs or custom string IDs as primary keys (`profile_template_id`), while others use standard auto-incrementing integers. Always check the primary keys configuration in the Model files before writing database queries.
 4. **Preserve Code Style:** Do not remove user-written comments or alter unrelated configurations. Use clean and well-commented code, referencing context files where applicable.
-5. **Git Commit & Push Guidelines:** Do NOT perform `git commit` or `git push` operations automatically unless explicitly requested by the user. When the user requests a git commit and git push, always split the commits separately by function or module (แยก commit ตาม function หรือ Module ทุกครั้งที่มีการสั่ง git commit และ git push).
+5. **Git Commit & Push Guidelines:**
+   - ห้ามสั่ง `git push` หรือ `git commit` เองโดยพลการหากผู้ใช้ไม่ได้สั่งหรือร้องขอ
+   - **เมื่อผู้ใช้สั่ง `git push`:** ให้ดำเนินการทำ `git commit` ให้ด้วยเสมอ โดยต้องแยก commit ตาม function หรือ module ให้เรียบร้อยก่อน แล้วจึงทำการ `git push` ไปยัง remote repository (ห้ามรวมการแก้ไขต่างฟังก์ชันไว้ใน commit เดียว)
 6. **Language for Documentation and Plans:** Always write implementation plans (`implementation_plan.md`), walkthroughs (`walkthrough.md`), and work summaries in Thai language (ภาษาไทย).
+7. **Pre-approved Operations (การทำงานที่อนุญาตให้ทำได้ทันทีโดยไม่ต้องขออนุญาต):**
+   The AI agent is explicitly permitted to execute the following diagnostic and inspection commands directly without needing prior confirmation or approval from the user:
+   - **Check PHP version:** (เช่น `php -v`, `docker compose exec app php -v`)
+   - **Check Docker version:** (เช่น `docker --version`, `docker compose version`)
+   - **Check Git status:** (เช่น `git status`)
+   - **Check diff of docker-compose.yml:** (เช่น `git diff docker-compose.yml`)
 
