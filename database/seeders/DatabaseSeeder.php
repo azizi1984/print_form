@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolesAndPermissionsSeeder::class,
+            SysfieldExSeeder::class,
         ]);
 
         if (!User::where('email', 'test@example.com')->exists()) {
