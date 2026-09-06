@@ -30,7 +30,7 @@
                                         <span class="fw-bold fs-5 tracking-wide">PRINT <span style="color: #818cf8 !important;">FORM</span></span>
                                     </div>
                                     <h4 class="fw-bold mb-2">ระบบจัดการแบบฟอร์ม</h4>
-                                    <p class="text-white-50 small mb-0">ออกแบบและกำหนดรูปแบบเทมเพลตใบขนสินค้าขาออกอย่างมืออาชีพ</p>
+                                    <p class="text-white-50 small mb-0">ออกแบบและกำหนดรูปแบบเทมเพลตเอกสารอย่างมืออาชีพ</p>
                                 </div>
 
                                 <div class="text-white-50 small position-relative" style="z-index: 2;">
