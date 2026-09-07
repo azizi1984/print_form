@@ -17,6 +17,9 @@ class ProfileTemplate extends Model
         'profile_id',
         'profile_template_name',
         'description',
+        'header_template_id',
+        'detail_template_id',
+        'footer_template_id',
         'status',
         'created_at',
         'updated_at',
@@ -25,4 +28,19 @@ class ProfileTemplate extends Model
         'updated_by',
         'deleted_by',
     ];
+
+    public function headerTemplate()
+    {
+        return $this->belongsTo(HeaderTemplate::class, 'header_template_id', 'header_template_id');
+    }
+
+    public function detailTemplate()
+    {
+        return $this->belongsTo(DetailTemplate::class, 'detail_template_id', 'detail_template_id');
+    }
+
+    public function footerTemplate()
+    {
+        return $this->belongsTo(FooterTemplate::class, 'footer_template_id', 'footer_template_id');
+    }
 }
