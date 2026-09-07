@@ -13,9 +13,11 @@ class SysfieldExSeeder extends Seeder
      */
     public function run(): void
     {
+        $connection = 'print';
+
         // Don't insert if records already exist
-        if (DB::table('sysfield_ex')->count() > 0) {
-            $this->command->info('sysfield_ex table already contains data. Skipping seeder.');
+        if (DB::connection($connection)->table('sysfield_ex')->count() > 0) {
+            $this->command->info("sysfield_ex table on [{$connection}] connection already contains data. Skipping seeder.");
             return;
         }
 
@@ -37,9 +39,9 @@ class SysfieldExSeeder extends Seeder
         // Chunk insert to avoid memory/packet size issues
         $chunks = array_chunk($records, 100);
         foreach ($chunks as $chunk) {
-            DB::table('sysfield_ex')->insert($chunk);
+            DB::connection($connection)->table('sysfield_ex')->insert($chunk);
         }
 
-        $this->command->info('Successfully seeded sysfield_ex table with ' . count($records) . ' records.');
+        $this->command->info("Successfully seeded sysfield_ex table on [{$connection}] with " . count($records) . " records.");
     }
 }

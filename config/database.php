@@ -63,6 +63,46 @@ return [
             ]) : [],
         ],
 
+        'print' => [
+            'driver' => 'mysql',
+            'url' => env('DB_PRINT_URL'),
+            'host' => env('DB_PRINT_HOST', '192.168.111.182'),
+            'port' => env('DB_PRINT_PORT', '3306'),
+            'database' => env('DB_PRINT_DATABASE', 'print'),
+            'username' => env('DB_PRINT_USERNAME', 'tom'),
+            'password' => env('DB_PRINT_PASSWORD', 'Tom@3366910'),
+            'unix_socket' => env('DB_PRINT_SOCKET', ''),
+            'charset' => env('DB_PRINT_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_PRINT_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
+        'mysql_print' => [
+            'driver' => 'mysql',
+            'url' => env('DB_PRINT_URL'),
+            'host' => env('DB_PRINT_HOST', '192.168.111.182'),
+            'port' => env('DB_PRINT_PORT', '3306'),
+            'database' => env('DB_PRINT_DATABASE', 'print'),
+            'username' => env('DB_PRINT_USERNAME', 'tom'),
+            'password' => env('DB_PRINT_PASSWORD', 'Tom@3366910'),
+            'unix_socket' => env('DB_PRINT_SOCKET', ''),
+            'charset' => env('DB_PRINT_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_PRINT_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
