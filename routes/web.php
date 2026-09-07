@@ -76,6 +76,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/footer-template/{id}/edit', 'edit')->name('footer-template.edit');
             Route::put('/footer-template/{id}', 'update')->name('footer-template.update');
             Route::delete('/footer-template/{id}', 'destroy')->name('footer-template.destroy');
+            Route::post('/footer-template/{id}/copy', 'copy')->name('footer-template.copy');
         });
     });
 });
