@@ -29,11 +29,17 @@ jQuery(function ($) {
         });
     }
 
-    // จัดการ Event เมื่อเปิด Modal Edit
+    // จัดการ Event เมื่อเปิด Modal Create / Edit
     const createOrEditModal = document.getElementById('createOrEditModal');
     if (createOrEditModal) {
         createOrEditModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
+            const errorAlert = document.getElementById('modalErrorAlert');
+            const errorMessageEl = document.getElementById('modalErrorMessage');
+            if (errorAlert) {
+                errorAlert.classList.add('d-none');
+                if (errorMessageEl) errorMessageEl.textContent = '';
+            }
 
             if (button) {
                 const id = button.getAttribute('data-id');
@@ -45,22 +51,27 @@ jQuery(function ($) {
                 document.getElementById('create_or_edit_footer_template_id').value = id || '';
                 document.getElementById('create_or_edit_footer_template_name').value = name || '';
                 document.getElementById('create_or_edit_description').value = desc || '';
-                document.getElementById('create_or_edit_status').value = status || 0;
+                document.getElementById('create_or_edit_status').value = (status !== null && status !== undefined && status !== '') ? status : '1';
                 document.getElementById('create_or_edit_created_at').value = date || '';
+
+                const labelEl = document.getElementById('editModalLabel');
+                const subtitleEl = document.getElementById('editModalSubtitle');
 
                 if (id) {
                     // โหมด Edit
                     document.getElementById('action_mode').value = 'edit';
-                    document.getElementById('editModalLabel').innerHTML = '<i class="bi bi-pencil-square me-2"></i>Edit Footer Template';
+                    if (labelEl) labelEl.innerHTML = '<i class="bi bi-pencil-square me-2 text-warning"></i>Edit Footer Template';
+                    if (subtitleEl) subtitleEl.textContent = 'แก้ไขข้อมูลและสถานะเทมเพลตส่วนท้ายเอกสารและลายเซ็น';
                     document.getElementById('wrapper_created_at').style.display = 'block';
                 } else {
                     // โหมด Create
                     document.getElementById('action_mode').value = 'create';
-                    document.getElementById('editModalLabel').innerHTML = '<i class="bi bi-plus-lg me-2"></i>Create Footer Template';
+                    if (labelEl) labelEl.innerHTML = '<i class="bi bi-layout-text-window-reverse me-2 text-primary"></i>Create Footer Template';
+                    if (subtitleEl) subtitleEl.textContent = 'กำหนดชื่อและรายละเอียดเทมเพลตส่วนท้ายเอกสารและลายเซ็น (Footer Template) สำหรับใบขนสินค้าขาออก';
                     document.getElementById('wrapper_created_at').style.display = 'none';
                     document.getElementById('createOrEditForm').reset();
                     document.getElementById('create_or_edit_footer_template_id').value = '';
-                    document.getElementById('create_or_edit_status').value = 0;
+                    document.getElementById('create_or_edit_status').value = '1';
                 }
             }
         });
@@ -69,6 +80,10 @@ jQuery(function ($) {
         if (btnCancel) {
             btnCancel.addEventListener('click', function () {
                 document.getElementById('createOrEditForm').reset();
+                const errorAlert = document.getElementById('modalErrorAlert');
+                if (errorAlert) {
+                    errorAlert.classList.add('d-none');
+                }
             });
         }
 
@@ -81,8 +96,17 @@ jQuery(function ($) {
                 const desc = document.getElementById('create_or_edit_description').value;
                 const status = document.getElementById('create_or_edit_status').value;
 
+                const errorAlert = document.getElementById('modalErrorAlert');
+                const errorMessageEl = document.getElementById('modalErrorMessage');
+
                 if (!name.trim()) {
-                    alert('Please enter Template Name');
+                    if (errorAlert && errorMessageEl) {
+                        errorMessageEl.textContent = 'กรุณาระบุชื่อ Footer Template Name';
+                        errorAlert.classList.remove('d-none');
+                    } else {
+                        alert('กรุณาระบุชื่อ Footer Template Name');
+                    }
+                    document.getElementById('create_or_edit_footer_template_name').focus();
                     return;
                 }
 
@@ -96,7 +120,11 @@ jQuery(function ($) {
 
                 const originalHtml = btnSave.innerHTML;
                 btnSave.disabled = true;
-                btnSave.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...';
+                btnSave.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> กำลังบันทึก...';
+
+                if (errorAlert) {
+                    errorAlert.classList.add('d-none');
+                }
 
                 $.ajax({
                     url: url,
@@ -104,16 +132,34 @@ jQuery(function ($) {
                     data: {
                         _method: method,
                         _token: $('meta[name="csrf-token"]').attr('content'),
-                        footer_template_name: name,
+                        footer_template_name: name.trim(),
                         description: desc,
                         status: status
                     },
                     success: function (res) {
-                        alert('Save successfully!');
+                        alert(res.message || 'บันทึกข้อมูลเรียบร้อยแล้ว');
                         location.reload();
                     },
                     error: function (xhr) {
-                        alert('Failed to save data. Please try again.');
+                        let msg = 'เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง';
+                        if (xhr.responseJSON) {
+                            if (xhr.responseJSON.errors) {
+                                const keys = Object.keys(xhr.responseJSON.errors);
+                                if (keys.length > 0) {
+                                    msg = xhr.responseJSON.errors[keys[0]][0];
+                                }
+                            } else if (xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            }
+                        }
+
+                        if (errorAlert && errorMessageEl) {
+                            errorMessageEl.textContent = msg;
+                            errorAlert.classList.remove('d-none');
+                        } else {
+                            alert(msg);
+                        }
+
                         console.error(xhr.responseText);
                         btnSave.disabled = false;
                         btnSave.innerHTML = originalHtml;
@@ -122,6 +168,48 @@ jQuery(function ($) {
             });
         }
     }
+
+    // จัดการ Event เมื่อกดปุ่ม Copy
+    $('#footer_declaration tbody').on('click', '.copy-btn', function (e) {
+        e.preventDefault();
+        const id = $(this).attr('data-id');
+
+        if (!id) return;
+
+        if (confirm('Are you sure you want to duplicate this template?')) {
+            const btn = $(this);
+            const originalHtml = btn.html();
+            btn.html('<span class="spinner-border spinner-border-sm text-success" role="status" aria-hidden="true"></span>');
+            btn.css('pointer-events', 'none');
+
+            $.ajax({
+                url: `/ex-declaration/footer-template/${id}/copy`,
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (res) {
+                    if (res.success) {
+                        alert('Copied successfully!');
+                        location.reload();
+                    } else {
+                        alert('Failed to copy: ' + res.message);
+                        btn.html(originalHtml);
+                        btn.css('pointer-events', 'auto');
+                    }
+                },
+                error: function (xhr) {
+                    const errMsg = (xhr.responseJSON && xhr.responseJSON.message) 
+                        ? xhr.responseJSON.message 
+                        : (xhr.statusText || 'Unknown error');
+                    alert('Failed to copy data: ' + errMsg);
+                    console.error(xhr.responseText);
+                    btn.html(originalHtml);
+                    btn.css('pointer-events', 'auto');
+                }
+            });
+        }
+    });
 
     // จัดการ Event เมื่อกดปุ่ม Delete (Trash)
     $('#footer_declaration tbody').on('click', '.delete-btn', function (e) {
