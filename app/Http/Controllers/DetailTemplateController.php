@@ -18,9 +18,10 @@ class DetailTemplateController extends Controller
     public function show($id)
     {
         $detailTemplate = DetailTemplate::with('items')->findOrFail($id);
-        $fields = DB::table('sysfield_ex')
+        $fields = DB::connection('print')->table('sysfield_ex')
             ->whereIn('print1', ['D1', 'D2'])
             ->where('app_show', 'Y')
+            ->orderBy('app_showt', 'asc')
             ->get();
 
         $layoutConfig = [];
@@ -189,4 +190,68 @@ class DetailTemplateController extends Controller
             return response()->json(['success' => false, 'message' => 'Failed to copy template: ' . $e->getMessage()], 500);
         }
     }
+
+    public function saveLayout(Request $request, $id)
+    {
+        $detailTemplate = DetailTemplate::findOrFail($id);
+
+        $layoutData = $request->input('layout');
+        if (is_string($layoutData)) {
+            $layoutData = json_decode($layoutData, true);
+        }
+
+        if (!is_array($layoutData)) {
+            $layoutData = [];
+        }
+
+        DB::beginTransaction();
+        try {
+            // Delete old items
+            $detailTemplate->items()->delete();
+
+            // Insert new items
+            $itemsToInsert = [];
+            foreach ($layoutData as $cellId => $fieldsList) {
+                if (is_array($fieldsList)) {
+                    foreach ($fieldsList as $index => $fieldData) {
+                        if (isset($fieldData['fieldId'])) {
+                            $itemsToInsert[] = [
+                                'detail_template_id' => $detailTemplate->detail_template_id,
+                                'cell_id' => $cellId,
+                                'field_name' => $fieldData['fieldId'],
+                                'custom_text' => $fieldData['customText'] ?? null,
+                                'seq' => $index + 1,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ];
+                        }
+                    }
+                }
+            }
+
+            if (!empty($itemsToInsert)) {
+                \App\Models\DetailTemplateItem::insert($itemsToInsert);
+            }
+
+            $detailTemplate->updated_by = Auth::id();
+            $detailTemplate->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'บันทึก Layout สำเร็จเรียบร้อยแล้ว'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Illuminate\Support\Facades\Log::error('Failed to save detail layout: ' . $e->getMessage(), [
+                'exception' => $e
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'เกิดข้อผิดพลาดในการบันทึก Layout: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
+

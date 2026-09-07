@@ -55,6 +55,7 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/header-template/{id}', 'update')->name('header-template.update');
             Route::delete('/header-template/{id}', 'destroy')->name('header-template.destroy');
             Route::post('/header-template/{id}/copy', 'copy')->name('header-template.copy');
+            Route::post('/header-template/{id}/save-layout', 'saveLayout')->name('header-template.save-layout');
         });
 
         Route::controller(DetailTemplateController::class)->group(function () {
@@ -66,6 +67,7 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/detail-template/{id}', 'update')->name('detail-template.update');
             Route::delete('/detail-template/{id}', 'destroy')->name('detail-template.destroy');
             Route::post('/detail-template/{id}/copy', 'copy')->name('detail-template.copy');
+            Route::post('/detail-template/{id}/save-layout', 'saveLayout')->name('detail-template.save-layout');
         });
 
         Route::controller(FooterTemplateController::class)->group(function () {
