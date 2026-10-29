@@ -19,6 +19,7 @@ class ExportDeclarationController extends Controller
 
         $profileTemplates = ProfileTemplate::with(['headerTemplate', 'detailTemplate', 'footerTemplate'])
             ->whereIn('profile_id', array_unique(array_filter([$userProfileId, 'ZZ00'])))
+            ->orderByRaw("CASE WHEN profile_id = 'ZZ00' THEN 0 ELSE 1 END")
             ->orderByDesc('created_at')
             ->get();
 

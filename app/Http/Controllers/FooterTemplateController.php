@@ -11,7 +11,11 @@ class FooterTemplateController extends Controller
 {
     public function index()
     {
-        $footerTemplates = FooterTemplate::whereIn('profile_id', [Auth::user()->profile_id, 'ZZ00'])->get();
+        $userProfileId = Auth::user()->profile_id ?? 'ZZ00';
+        $footerTemplates = FooterTemplate::whereIn('profile_id', array_unique([$userProfileId, 'ZZ00']))
+            ->orderByRaw("CASE WHEN profile_id = 'ZZ00' THEN 0 ELSE 1 END")
+            ->orderBy('created_at', 'desc')
+            ->get();
         return view('ex_declaration.footer_templates.index', compact('footerTemplates'));
     }
 

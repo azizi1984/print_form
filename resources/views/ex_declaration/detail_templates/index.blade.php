@@ -33,7 +33,14 @@
                     <tr>
                         <td class="text-center text-muted fw-semibold">{{ $loop->iteration }}</td>
                         <td>
-                            <span class="fw-semibold text-dark">{{ $row->detail_template_name ?? $row['detail_template_name'] }}</span>
+                            <div class="d-flex align-items-center">
+                                <span class="fw-semibold text-dark">{{ $row->detail_template_name ?? $row['detail_template_name'] }}</span>
+                                @if(($row->profile_id ?? '') === 'ZZ00')
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle ms-2" style="font-size: 11px;">
+                                        <i class="bi bi-shield-lock me-1"></i>ส่วนกลาง
+                                    </span>
+                                @endif
+                            </div>
                         </td>
                         <td class="text-secondary">
                             @if(!empty($row->description ?? $row['description']))
@@ -62,19 +69,31 @@
                                 <a href="#" class="btn-action btn-action-copy copy-btn" title="คัดลอกเทมเพลต" data-id="{{ $row->detail_template_id ?? $row['detail_template_id'] }}">
                                     <i class="bi bi-copy"></i>
                                 </a>
-                                <a href="#" class="btn-action btn-action-edit" title="แก้ไขข้อมูล"
-                                   data-bs-toggle="modal" 
-                                   data-bs-target="#createOrEditModal"
-                                   data-id="{{ $row->detail_template_id ?? $row['detail_template_id'] }}"
-                                   data-name="{{ $row->detail_template_name ?? $row['detail_template_name'] }}"
-                                   data-desc="{{ $row->description ?? $row['description'] ?? '' }}"
-                                   data-status="{{ $row->status ?? $row['status'] }}"
-                                   data-date="{{ $row->created_at ? \Carbon\Carbon::parse($row->created_at)->format('d/m/Y H:i') : '' }}">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <a href="#" class="btn-action btn-action-delete delete-btn" title="ลบ" data-id="{{ $row->detail_template_id ?? $row['detail_template_id'] }}">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                                @php
+                                    $currentUserProfile = Auth::user()->profile_id ?? 'ZZ00';
+                                    $canModify = ($currentUserProfile === 'ZZ00' || ($row->profile_id ?? '') === $currentUserProfile);
+                                @endphp
+                                @if($canModify)
+                                    <a href="#" class="btn-action btn-action-edit" title="แก้ไขข้อมูล"
+                                       data-bs-toggle="modal" 
+                                       data-bs-target="#createOrEditModal"
+                                       data-id="{{ $row->detail_template_id ?? $row['detail_template_id'] }}"
+                                       data-name="{{ $row->detail_template_name ?? $row['detail_template_name'] }}"
+                                       data-desc="{{ $row->description ?? $row['description'] ?? '' }}"
+                                       data-status="{{ $row->status ?? $row['status'] }}"
+                                       data-date="{{ $row->created_at ? \Carbon\Carbon::parse($row->created_at)->format('d/m/Y H:i') : '' }}">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a href="#" class="btn-action btn-action-delete delete-btn" title="ลบ" data-id="{{ $row->detail_template_id ?? $row['detail_template_id'] }}">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                @else
+                                    <span class="d-inline-block" title="เทมเพลตมาตรฐานส่วนกลาง (อ่านและคัดลอกได้อย่างเดียว)">
+                                        <button type="button" class="btn-action btn-action-edit disabled opacity-50" disabled style="cursor: not-allowed;">
+                                            <i class="bi bi-lock-fill"></i>
+                                        </button>
+                                    </span>
+                                @endif
                             </div>
                         </td>
                     </tr>

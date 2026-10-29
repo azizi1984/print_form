@@ -10,21 +10,23 @@ jQuery(function ($) {
     if (tableEl.length > 0) {
         tableEl.DataTable({
             pageLength: 10,
-            lengthMenu: [[10, 50, 100], [10, 50, 100]],
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             searching: true,
             order: [], // keep default order
+            pagingType: 'full_numbers',
             language: {
                 lengthMenu: "แสดง _MENU_ รายการ",
-                search: "ค้นหาข้อมูล:",
+                search: "ค้นหา:",
                 info: "แสดงข้อมูล _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
                 infoEmpty: "แสดงข้อมูล 0 ถึง 0 จากทั้งหมด 0 รายการ",
                 infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
                 zeroRecords: "ไม่พบข้อมูลที่ค้นหา",
+                processing: '<div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>กำลังโหลดข้อมูล...',
                 paginate: {
-                    first: "หน้าแรก",
-                    last: "หน้าสุดท้าย",
-                    next: "ถัดไป",
-                    previous: "ก่อนหน้า"
+                    first: "«",
+                    last: "»",
+                    next: "›",
+                    previous: "‹"
                 }
             }
         });
@@ -116,7 +118,7 @@ jQuery(function ($) {
                         errorMessageEl.textContent = 'กรุณากรอกชื่อ Profile Template Name';
                         errorAlert.classList.remove('d-none');
                     } else {
-                        alert('กรุณากรอกชื่อ Profile Template Name');
+                        window.showToast('danger', 'กรุณากรอกชื่อ Profile Template Name');
                     }
                     document.getElementById('create_or_edit_profile_template_name').focus();
                     return;
@@ -152,8 +154,8 @@ jQuery(function ($) {
                         footer_template_id: footerId || null
                     },
                     success: function (res) {
-                        alert(res.message || 'บันทึกข้อมูลเรียบร้อยแล้ว');
-                        location.reload();
+                        window.showToast('success', res.message || 'บันทึกข้อมูลเรียบร้อยแล้ว');
+                        setTimeout(() => location.reload(), 600);
                     },
                     error: function (xhr) {
                         let msg = 'เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง';
@@ -172,7 +174,7 @@ jQuery(function ($) {
                             errorMessageEl.textContent = msg;
                             errorAlert.classList.remove('d-none');
                         } else {
-                            alert(msg);
+                            window.showToast('danger', msg);
                         }
 
                         console.error(xhr.responseText);
@@ -191,32 +193,34 @@ jQuery(function ($) {
 
         if (!id) return;
 
-        if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบ Profile Template นี้?')) {
-            const btn = $(this);
-            const originalHtml = btn.html();
-            btn.html('<span class="spinner-border spinner-border-sm text-danger" role="status" aria-hidden="true"></span>');
-            btn.css('pointer-events', 'none');
+        window.showConfirmModal({
+            title: 'ยืนยันการลบเทมเพลต',
+            message: 'คุณแน่ใจหรือไม่ว่าต้องการลบ Profile Template นี้? (สามารถกู้คืนได้ผ่านระบบ Soft Delete)',
+            type: 'danger',
+            iconClass: 'bi-trash-fill text-danger',
+            confirmText: 'ลบข้อมูล',
+            onConfirm: function () {
+                window.showToast('primary', 'กำลังลบเทมเพลต...');
 
-            $.ajax({
-                url: `/ex-declaration/profile-template/${id}`,
-                type: 'POST',
-                data: {
-                    _method: 'DELETE',
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function (res) {
-                    if (res.success) {
-                        alert(res.message || 'ลบข้อมูลเรียบร้อยแล้ว');
-                        location.reload();
+                $.ajax({
+                    url: `/ex-declaration/profile-template/${id}`,
+                    type: 'POST',
+                    data: {
+                        _method: 'DELETE',
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            window.showToast('success', res.message || 'ลบข้อมูลเรียบร้อยแล้ว');
+                            setTimeout(() => location.reload(), 600);
+                        }
+                    },
+                    error: function (xhr) {
+                        window.showToast('danger', 'เกิดข้อผิดพลาดในการลบข้อมูล กรุณาลองใหม่อีกครั้ง');
+                        console.error(xhr.responseText);
                     }
-                },
-                error: function (xhr) {
-                    alert('เกิดข้อผิดพลาดในการลบข้อมูล กรุณาลองใหม่อีกครั้ง');
-                    console.error(xhr.responseText);
-                    btn.html(originalHtml);
-                    btn.css('pointer-events', 'auto');
-                }
-            });
-        }
+                });
+            }
+        });
     });
 });

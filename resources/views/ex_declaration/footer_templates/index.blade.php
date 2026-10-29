@@ -32,7 +32,16 @@
                     @foreach($footerTemplates as $row)
                     <tr>
                         <td class="text-center text-muted fw-semibold">{{ $loop->iteration }}</td>
-                        <td class="fw-semibold text-dark">{{ $row['footer_template_name'] }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="fw-semibold text-dark">{{ $row['footer_template_name'] }}</span>
+                                @if(($row['profile_id'] ?? $row->profile_id ?? '') === 'ZZ00')
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle ms-2" style="font-size: 11px;">
+                                        <i class="bi bi-shield-lock me-1"></i>ส่วนกลาง
+                                    </span>
+                                @endif
+                            </div>
+                        </td>
                         <td class="text-secondary">
                             @if(!empty($row['description'] ?? $row->description))
                                 <span class="d-inline-block text-truncate" style="max-width: 320px;" title="{{ $row['description'] ?? $row->description }}">
@@ -60,19 +69,32 @@
                                 <a href="#" class="btn-action btn-action-copy copy-btn" title="คัดลอกเทมเพลต" data-id="{{ $row['footer_template_id'] ?? $row->footer_template_id }}">
                                     <i class="bi bi-copy"></i>
                                 </a>
-                                <a href="#" class="btn-action btn-action-edit" title="แก้ไขข้อมูล"
-                                   data-bs-toggle="modal" 
-                                   data-bs-target="#createOrEditModal"
-                                   data-id="{{ $row['footer_template_id'] ?? '' }}"
-                                   data-name="{{ $row['footer_template_name'] ?? '' }}"
-                                   data-desc="{{ $row['description'] ?? '' }}"
-                                   data-status="{{ $row['status'] ?? '' }}"
-                                   data-date="{{ !empty($row['created_at']) ? \Carbon\Carbon::parse($row['created_at'])->format('d/m/Y H:i') : '' }}">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <a href="#" class="btn-action btn-action-delete delete-btn" title="ลบ" data-id="{{ $row['footer_template_id'] ?? '' }}">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                                @php
+                                    $currentUserProfile = Auth::user()->profile_id ?? 'ZZ00';
+                                    $rowProfile = $row['profile_id'] ?? $row->profile_id ?? '';
+                                    $canModify = ($currentUserProfile === 'ZZ00' || $rowProfile === $currentUserProfile);
+                                @endphp
+                                @if($canModify)
+                                    <a href="#" class="btn-action btn-action-edit" title="แก้ไขข้อมูล"
+                                       data-bs-toggle="modal" 
+                                       data-bs-target="#createOrEditModal"
+                                       data-id="{{ $row['footer_template_id'] ?? '' }}"
+                                       data-name="{{ $row['footer_template_name'] ?? '' }}"
+                                       data-desc="{{ $row['description'] ?? '' }}"
+                                       data-status="{{ $row['status'] ?? '' }}"
+                                       data-date="{{ !empty($row['created_at']) ? \Carbon\Carbon::parse($row['created_at'])->format('d/m/Y H:i') : '' }}">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a href="#" class="btn-action btn-action-delete delete-btn" title="ลบ" data-id="{{ $row['footer_template_id'] ?? '' }}">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                @else
+                                    <span class="d-inline-block" title="เทมเพลตมาตรฐานส่วนกลาง (อ่านและคัดลอกได้อย่างเดียว)">
+                                        <button type="button" class="btn-action btn-action-edit disabled opacity-50" disabled style="cursor: not-allowed;">
+                                            <i class="bi bi-lock-fill"></i>
+                                        </button>
+                                    </span>
+                                @endif
                             </div>
                         </td>
                     </tr>

@@ -5,24 +5,26 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\DetailTemplate;
+use App\Models\SysfieldEx;
 use Illuminate\Support\Facades\DB;
 
 class DetailTemplateController extends Controller
 {
     public function index()
     {
-        $detailTemplates = DetailTemplate::whereIn('profile_id', [Auth::user()->profile_id, 'ZZ00'])->get();
+        $userProfileId = Auth::user()->profile_id ?? 'ZZ00';
+        $detailTemplates = DetailTemplate::whereIn('profile_id', array_unique([$userProfileId, 'ZZ00']))
+            ->orderByRaw("CASE WHEN profile_id = 'ZZ00' THEN 0 ELSE 1 END")
+            ->orderBy('created_at', 'desc')
+            ->get();
         return view('ex_declaration.detail_templates.index', compact('detailTemplates'));
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $detailTemplate = DetailTemplate::with('items')->findOrFail($id);
-        $fields = DB::connection('print')->table('sysfield_ex')
-            ->whereIn('print1', ['D1', 'D2'])
-            ->where('app_show', 'Y')
-            ->orderBy('app_showt', 'asc')
-            ->get();
+        $forceRefresh = $request->boolean('refresh') || $request->has('refresh');
+        $fields = SysfieldEx::getDetailFields($forceRefresh);
 
         $layoutConfig = [];
         foreach ($detailTemplate->items as $item) {

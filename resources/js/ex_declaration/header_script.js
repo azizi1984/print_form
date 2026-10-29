@@ -10,20 +10,23 @@ jQuery(function ($) {
     if (tableEl.length > 0) {
         tableEl.DataTable({
             pageLength: 10,
-            lengthMenu: [[10, 50, 100], [10, 50, 100]],
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             searching: true,
+            order: [], // ป้องกัน DataTable auto sort คอลัมน์แรก เพื่อให้ข้อมูลส่วนกลางแสดงเป็น record แรกเสมอ
+            pagingType: 'full_numbers',
             language: {
                 lengthMenu: "แสดง _MENU_ รายการ",
-                search: "ค้นหาข้อมูล:",
+                search: "ค้นหา:",
                 info: "แสดงข้อมูล _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
                 infoEmpty: "แสดงข้อมูล 0 ถึง 0 จากทั้งหมด 0 รายการ",
                 infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
                 zeroRecords: "ไม่พบข้อมูลที่ค้นหา",
+                processing: '<div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>กำลังโหลดข้อมูล...',
                 paginate: {
-                    first: "หน้าแรก",
-                    last: "หน้าสุดท้าย",
-                    next: "ถัดไป",
-                    previous: "ก่อนหน้า"
+                    first: "«",
+                    last: "»",
+                    next: "›",
+                    previous: "‹"
                 }
             }
         });
@@ -104,7 +107,7 @@ jQuery(function ($) {
                         errorMessageEl.textContent = 'กรุณาระบุชื่อ Header Template Name';
                         errorAlert.classList.remove('d-none');
                     } else {
-                        alert('กรุณาระบุชื่อ Header Template Name');
+                        showToast('danger', 'กรุณาระบุชื่อ Header Template Name');
                     }
                     document.getElementById('create_or_edit_header_template_name').focus();
                     return;
@@ -137,8 +140,10 @@ jQuery(function ($) {
                         status: status
                     },
                     success: function (res) {
-                        alert(res.message || 'บันทึกข้อมูลเรียบร้อยแล้ว');
-                        location.reload();
+                        showToast('success', res.message || 'บันทึกข้อมูลเรียบร้อยแล้ว');
+                        const modalInstance = window.bootstrap ? window.bootstrap.Modal.getInstance(createOrEditModal) : null;
+                        if (modalInstance) modalInstance.hide();
+                        setTimeout(() => location.reload(), 600);
                     },
                     error: function (xhr) {
                         let msg = 'เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง';
@@ -157,7 +162,7 @@ jQuery(function ($) {
                             errorMessageEl.textContent = msg;
                             errorAlert.classList.remove('d-none');
                         } else {
-                            alert(msg);
+                            showToast('danger', msg);
                         }
 
                         console.error(xhr.responseText);
@@ -169,84 +174,82 @@ jQuery(function ($) {
         }
     }
 
-    // จัดการ Event เมื่อกดปุ่ม Copy
+    // จัดการ Event เมื่อกดปุ่ม Copy (ใช้ Bootstrap Confirm Modal)
     $('#header_declaration tbody').on('click', '.copy-btn', function (e) {
         e.preventDefault();
         const id = $(this).attr('data-id');
 
         if (!id) return;
 
-        if (confirm('Are you sure you want to duplicate this template?')) {
-            const btn = $(this);
-            const originalHtml = btn.html();
-            btn.html('<span class="spinner-border spinner-border-sm text-success" role="status" aria-hidden="true"></span>');
-            btn.css('pointer-events', 'none');
+        showConfirmModal({
+            title: 'ยืนยันการคัดลอกเทมเพลต',
+            message: 'คุณต้องการคัดลอก (Duplicate) แม่แบบนี้เพื่อสร้างเทมเพลตใหม่ใช่หรือไม่?',
+            iconClass: 'bi-copy text-success',
+            iconBgClass: 'bg-success-subtle',
+            confirmBtnClass: 'btn-success',
+            confirmText: 'คัดลอก',
+            onConfirm: function () {
+                showToast('primary', 'กำลังดำเนินการคัดลอกเทมเพลต...');
 
-            $.ajax({
-                url: `/ex-declaration/header-template/${id}/copy`,
-                type: 'POST',
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function (res) {
-                    if (res.success) {
-                        alert('Copied successfully!');
-                        location.reload();
-                    } else {
-                        alert('Failed to copy: ' + res.message);
-                        btn.html(originalHtml);
-                        btn.css('pointer-events', 'auto');
+                $.ajax({
+                    url: `/ex-declaration/header-template/${id}/copy`,
+                    type: 'POST',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (res) {
+                        showToast('success', res.message || 'คัดลอกเทมเพลตสำเร็จเรียบร้อยแล้ว');
+                        setTimeout(() => location.reload(), 600);
+                    },
+                    error: function (xhr) {
+                        const errMsg = (xhr.responseJSON && xhr.responseJSON.message) 
+                            ? xhr.responseJSON.message 
+                            : (xhr.statusText || 'เกิดข้อผิดพลาดในการคัดลอกข้อมูล');
+                        showToast('danger', errMsg);
+                        console.error(xhr.responseText);
                     }
-                },
-                error: function (xhr) {
-                    const errMsg = (xhr.responseJSON && xhr.responseJSON.message) 
-                        ? xhr.responseJSON.message 
-                        : (xhr.statusText || 'Unknown error');
-                    alert('Failed to copy data: ' + errMsg);
-                    console.error(xhr.responseText);
-                    btn.html(originalHtml);
-                    btn.css('pointer-events', 'auto');
-                }
-            });
-        }
+                });
+            }
+        });
     });
 
-    // จัดการ Event เมื่อกดปุ่ม Delete (Trash)
+    // จัดการ Event เมื่อกดปุ่ม Delete (ใช้ Bootstrap Confirm Modal)
     $('#header_declaration tbody').on('click', '.delete-btn', function (e) {
         e.preventDefault();
         const id = $(this).attr('data-id');
 
         if (!id) return;
 
-        if (confirm('Are you sure you want to delete this template?')) {
-            const btn = $(this);
-            const originalHtml = btn.html();
-            btn.html('<span class="spinner-border spinner-border-sm text-danger" role="status" aria-hidden="true"></span>');
-            btn.css('pointer-events', 'none');
+        showConfirmModal({
+            title: 'ยืนยันการลบเทมเพลต',
+            message: 'คุณแน่ใจหรือไม่ว่าต้องการลบแม่แบบนี้? (สามารถกู้คืนได้ผ่านระบบ Soft Delete)',
+            iconClass: 'bi-trash-fill text-danger',
+            iconBgClass: 'bg-danger-subtle',
+            confirmBtnClass: 'btn-danger',
+            confirmText: 'ลบข้อมูล',
+            onConfirm: function () {
+                showToast('primary', 'กำลังลบเทมเพลต...');
 
-            $.ajax({
-                url: `/ex-declaration/header-template/${id}`,
-                type: 'POST',
-                data: {
-                    _method: 'DELETE',
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function (res) {
-                    if (res.success) {
-                        alert('Deleted successfully!');
-                        location.reload();
+                $.ajax({
+                    url: `/ex-declaration/header-template/${id}`,
+                    type: 'POST',
+                    data: {
+                        _method: 'DELETE',
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (res) {
+                        showToast('success', res.message || 'ลบเทมเพลตเรียบร้อยแล้ว');
+                        setTimeout(() => location.reload(), 600);
+                    },
+                    error: function (xhr) {
+                        const errMsg = (xhr.responseJSON && xhr.responseJSON.message) 
+                            ? xhr.responseJSON.message 
+                            : (xhr.statusText || 'เกิดข้อผิดพลาดในการลบข้อมูล');
+                        showToast('danger', errMsg);
+                        console.error(xhr.responseText);
                     }
-                },
-                error: function (xhr) {
-                    const errMsg = (xhr.responseJSON && xhr.responseJSON.message) 
-                        ? xhr.responseJSON.message 
-                        : (xhr.statusText || 'Unknown error');
-                    alert('Failed to delete data: ' + errMsg);
-                    console.error(xhr.responseText);
-                    btn.html(originalHtml);
-                    btn.css('pointer-events', 'auto');
-                }
-            });
-        }
+                });
+            }
+        });
     });
 });
