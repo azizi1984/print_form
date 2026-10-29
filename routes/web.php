@@ -48,10 +48,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::controller(HeaderTemplateController::class)->group(function () {
             Route::get('/header-template', 'index')->name('header-template');
-            Route::get('/header-template/create', 'create')->name('header-template.create');
             Route::post('/header-template', 'store')->name('header-template.store');
             Route::get('/header-template/{id}', 'show')->name('header-template.show');
-            Route::get('/header-template/{id}/edit', 'edit')->name('header-template.edit');
             Route::put('/header-template/{id}', 'update')->name('header-template.update');
             Route::delete('/header-template/{id}', 'destroy')->name('header-template.destroy');
             Route::post('/header-template/{id}/copy', 'copy')->name('header-template.copy');
