@@ -19,3 +19,7 @@ The AI agent is explicitly authorized to run the following diagnostic and status
 ## General Development Rules
 - **Language for Documentation:** Plans, walkthroughs, and explanations must be in Thai (ภาษาไทย).
 - **Layout Reuse:** Use `layouts.app` and `layouts.topbar` for all blade views.
+- **Global UI Notification & Confirmation Standard:** ห้ามใช้ Browser Native `alert()` และ `confirm()` ใน JavaScript หรือ Blade เด็ดขาด ให้ใช้ `window.showToast()`, `window.showConfirmModal()`, หรือ `window.showAlertModal()` ที่รวมไว้ใน `layouts.app` เสมอ เพื่อรักษามาตรฐาน UI/UX เดียวกันทั้งระบบ
+- **Master Data Caching Rule (Business Logic):** ข้อมูล Master หรือ Metadata ที่อ่านซ้ำบ่อยและไม่ค่อยเปลี่ยนแปลง (เช่น `sysfield_ex`) ต้องกำหนดระยะเวลา Cache 24 ชั่วโมง ผ่าน Eloquent Model Helper พร้อมกลไก Invalidate อัตโนมัติเมื่อมีการเปลี่ยนแปลง
+- **Central Template Priority Rule (Business Logic):** หน้า Index ของเทมเพลตทุกประเภท (Header, Detail, Footer, Profile) ต้องจัดเรียงข้อมูลที่สร้างจากส่วนกลาง (`profile_id = 'ZZ00'`) แสดงเป็น Record แรกเสมอ พร้อม Badge "ส่วนกลาง" และตั้งค่า `order: []` ใน DataTable
+- **Modular Blade Design:** หลีกเลี่ยง Monolithic Blade Files ขนาดใหญ่ในหน้าที่ซับซ้อน ให้แยก UI และ Logic ย่อยออกเป็น Blade Partials ในโฟลเดอร์ `partials/` เสมอ

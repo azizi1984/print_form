@@ -35,6 +35,12 @@ All contributions to this project must follow these backend and frontend standar
     ```
 * **Soft Deletes:**
   * The tables `users`, `profiles`, `profile_templates`, and `form_templates` utilize Laravel's `SoftDeletes` trait. When executing deletes, ensure they are marked as deleted instead of using hard deletion (unless requested explicitly).
+* **Master Data Caching Standards (Business Logic):**
+  * สำหรับตาราง Master หรือ Metadata ที่มีการอ่านบ่อยครั้งแต่ข้อมูลแทบไม่เปลี่ยนแปลง (เช่น `sysfield_ex` หรือตารางฟิลด์ศุลกากร) ให้ทำการ Cache ผลลัพธ์เป็นระยะเวลา 24 ชั่วโมง (86,400 วินาที) เสมอ เพื่อลด Query ข้าม Database
+  * ต้องมีฟังก์ชันเคลียร์ Cache อัตโนมัติเมื่อมีการเปลี่ยนแปลงข้อมูล (`booted()` Model Events เช่น `saved`, `deleted`) หรือปุ่ม/เมธอด Force Refresh ให้ผู้ใช้สามารถรีเฟรชข้อมูลได้เองเมื่อจำเป็น
+* **Central Master Template Priority (Business Logic):**
+  * ในหน้า Index ของเทมเพลต (เช่น Header, Detail, Footer, และ Profile Templates) ข้อมูลแม่แบบที่สร้างจากส่วนกลาง (`profile_id = 'ZZ00'`) ต้องถูกจัดเรียงแสดงผลเป็น Record แรกเสมอ โดยใช้ `->orderByRaw("CASE WHEN profile_id = 'ZZ00' THEN 0 ELSE 1 END")->orderBy('created_at', 'desc')`
+  * ฝั่ง Client-side DataTables ต้องกำหนด `order: []` เพื่อรักษาลำดับความสำคัญจาก Backend และต้องแสดง Badge "ส่วนกลาง" พร้อมป้องกันไม่ให้ผู้ใช้ที่ไม่ใช่ส่วนกลางแก้ไขหรือลบเทมเพลตมาตรฐานได้
 
 ### 1.2 Frontend Standards
 * **Tech Stack:** TailwindCSS is NOT utilized. Styling is strictly done using **Bootstrap 5**, **Bootstrap Icons**, and custom variables defined in `resources/css/app.css`.
@@ -43,10 +49,37 @@ All contributions to this project must follow these backend and frontend standar
   * `--topbar-bg`: `#556ee6` (Topbar blue)
   * `--sidebar-bg`: `#2a3042` (Dark gray/navy sidebar)
   * `--card-shadow`: `0 0.75rem 1.5rem rgba(18, 38, 63, .03)`
-* **DataTables Localization:**
-  * When initializing DataTables, always configure Thai language translation elements for consistency (see example in `resources/js/ex_declaration/script.js`).
+* **DataTables Localization & Pagination Standard:**
+  * When initializing DataTables, always configure Thai language translation elements with standard pagination controls:
+    ```javascript
+    pagingType: 'full_numbers',
+    language: {
+        lengthMenu: "แสดง _MENU_ รายการ",
+        search: "ค้นหา:",
+        info: "แสดงข้อมูล _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+        infoEmpty: "แสดงข้อมูล 0 ถึง 0 จากทั้งหมด 0 รายการ",
+        infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
+        zeroRecords: "ไม่พบข้อมูลที่ค้นหา",
+        processing: '<div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>กำลังโหลดข้อมูล...',
+        paginate: {
+            first: "«",
+            last: "»",
+            next: "›",
+            previous: "‹"
+        }
+    }
+    ```
 * **Vite Integration:**
   * Do not reference public folders directly for custom scripts. Custom scripts must be placed in `resources/js/` and imported in Blade views via `@vite(['resources/js/path/to/script.js'])`.
+* **Global UI Notifications & Confirmation Standard (ห้ามใช้ Browser `alert()` และ `confirm()`):**
+  * ห้ามใช้คำสั่ง Native Browser `alert()`, `confirm()`, หรือ `prompt()` ใน JavaScript หรือ Blade เด็ดขาด เพื่อความเป็นเอกภาพของ User Experience (UX)
+  * ทุกการแจ้งเตือนและการยืนยันต้องใช้ Global Components ที่รวมไว้ใน `layouts.app` (`layouts.partials.global_dialogs` และ `resources/js/dialogs.js`):
+    * `window.showToast(type, message, duration)`: สำหรับ Toast Notification แสดงผลสถานะการทำงาน (type: `'success'`, `'danger'`/`'error'`, `'warning'`, `'info'`, `'primary'`)
+    * `window.showConfirmModal({ title, message, type, confirmText, cancelText, onConfirm, onCancel })`: สำหรับ Confirmation Dialog ยืนยันการทำรายการ เช่น ลบข้อมูล, คัดลอก, รีเซ็ต
+    * `window.showConfirm(options)`: สำหรับ Confirmation แบบ Promise คืนค่า `boolean` เพื่อใช้ร่วมกับ async/await
+    * `window.showAlertModal(options)` / `window.showAlert(message, title, type)`: สำหรับ Alert Dialog แจ้งเตือนสำคัญแบบมีปุ่มตกลง
+* **Modular Blade Structure:**
+  * หลีกเลี่ยงการสร้าง Monolithic Blade File ขนาดใหญ่ (เกิน 500 บรรทัด) ในหน้าที่มีความซับซ้อนสูง (เช่น Visual Designer / Template Manager) ให้แยกองค์ประกอบเป็น Partials ย่อยในโฟลเดอร์ `partials/` เสมอ (เช่น `grid_layout.blade.php`, `sidebar_fields.blade.php`, `modals.blade.php`, `scripts.blade.php`, `styles.blade.php`)
 
 ---
 
