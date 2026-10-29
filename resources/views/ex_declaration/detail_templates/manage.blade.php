@@ -621,18 +621,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Toast Notification Container -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
-        <div id="actionToast" class="toast align-items-center text-white border-0 shadow-lg rounded-3" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body d-flex align-items-center gap-2 fs-6" id="actionToastBody">
-                    <!-- Message here -->
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto shadow-none" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
 </div>
 @endsection
 
@@ -686,28 +674,6 @@
                     dirtyIndicator.classList.add('d-none');
                 }
             }
-        }
-
-        // Helper for Toast notification
-        function showToast(type, message) {
-            const toastEl = document.getElementById('actionToast');
-            const toastBody = document.getElementById('actionToastBody');
-            if (!toastEl || !toastBody) return;
-
-            toastEl.className = 'toast align-items-center text-white border-0 shadow-lg rounded-3';
-            if (type === 'success') {
-                toastEl.classList.add('bg-success');
-                toastBody.innerHTML = '<i class="bi bi-check-circle-fill fs-5"></i> ' + message;
-            } else if (type === 'danger') {
-                toastEl.classList.add('bg-danger');
-                toastBody.innerHTML = '<i class="bi bi-exclamation-triangle-fill fs-5"></i> ' + message;
-            } else {
-                toastEl.classList.add('bg-primary');
-                toastBody.innerHTML = '<i class="bi bi-info-circle-fill fs-5"></i> ' + message;
-            }
-
-            const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3500 });
-            toast.show();
         }
 
         // Helper to get display label (app_showt) for a field
@@ -860,7 +826,7 @@
             // Check if already contains this field to prevent duplicates
             const exists = savedLayout[cellId].some(item => item.fieldId === fieldId);
             if (exists) {
-                showToast('danger', 'ฟิลด์นี้ถูกเลือกในช่องนี้แล้ว');
+                window.showToast('danger', 'ฟิลด์นี้ถูกเลือกในช่องนี้แล้ว');
                 return;
             }
 
@@ -1002,16 +968,16 @@
         fields.forEach(field => {
             field.addEventListener('click', function() {
                 if (currentMode === 'preview') {
-                    showToast('primary', 'กรุณาสลับกลับมาที่ Design Mode ก่อนทำการเลือกฟิลด์');
+                    window.showToast('primary', 'กรุณาสลับกลับมาที่ Design Mode ก่อนทำการเลือกฟิลด์');
                     return;
                 }
                 if (!activeCell) {
-                    showToast('danger', 'กรุณาคลิกเลือกช่องตาราง (Grid Cell) บนฟอร์มก่อน');
+                    window.showToast('danger', 'กรุณาคลิกเลือกช่องตาราง (Grid Cell) บนฟอร์มก่อน');
                     return;
                 }
                 const contentEl = activeCell.querySelector('.cell-content');
                 if (!contentEl) {
-                    showToast('danger', 'ช่องนี้ไม่สามารถผูกฟิลด์ข้อมูลได้');
+                    window.showToast('danger', 'ช่องนี้ไม่สามารถผูกฟิลด์ข้อมูลได้');
                     activeCell.classList.remove('active');
                     activeCell = null;
                     return;
@@ -1096,28 +1062,35 @@
         // Clear cell
         btnClear.addEventListener('click', function() {
             if (!activeCell) {
-                showToast('danger', 'กรุณาคลิกเลือกช่องที่ต้องการล้างข้อมูลก่อน');
+                window.showToast('danger', 'กรุณาคลิกเลือกช่องที่ต้องการล้างข้อมูลก่อน');
                 return;
             }
             unbindFieldFromCell(activeCell);
             activeCell.classList.remove('active');
             activeCell = null;
-            showToast('primary', 'ล้างข้อมูลในช่องที่เลือกแล้ว');
+            window.showToast('primary', 'ล้างข้อมูลในช่องที่เลือกแล้ว');
         });
 
         // Reset grid
         btnReset.addEventListener('click', function() {
-            if (confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างการจัดวางทั้งหมดของฟอร์มนี้?')) {
-                cells.forEach(cell => {
-                    unbindFieldFromCell(cell);
-                    cell.classList.remove('active');
-                });
+            window.showConfirmModal({
+                title: 'รีเซ็ตแบบฟอร์ม',
+                message: 'คุณแน่ใจหรือไม่ว่าต้องการล้างการจัดวางทั้งหมดของฟอร์มนี้?',
+                type: 'danger',
+                iconClass: 'bi-arrow-counterclockwise text-danger',
+                confirmText: 'ล้างฟอร์ม',
+                onConfirm: function() {
+                    cells.forEach(cell => {
+                        unbindFieldFromCell(cell);
+                        cell.classList.remove('active');
+                    });
 
-                savedLayout = {};
-                activeCell = null;
-                setDirty(true);
-                showToast('primary', 'รีเซ็ตแบบฟอร์มเรียบร้อยแล้ว');
-            }
+                    savedLayout = {};
+                    activeCell = null;
+                    setDirty(true);
+                    window.showToast('primary', 'รีเซ็ตแบบฟอร์มเรียบร้อยแล้ว');
+                }
+            });
         });
 
         // AJAX Save Layout (Using dedicated save-layout endpoint)
@@ -1140,7 +1113,7 @@
                 },
                 success: (res) => {
                     setDirty(false);
-                    showToast('success', res.message || 'บันทึกตำแหน่งเลย์เอาต์เรียบร้อยแล้ว!');
+                    window.showToast('success', res.message || 'บันทึกตำแหน่งเลย์เอาต์เรียบร้อยแล้ว!');
                     this.disabled = false;
                     this.innerHTML = originalHtml;
                 },
@@ -1148,7 +1121,7 @@
                     const errMsg = (xhr.responseJSON && xhr.responseJSON.message) 
                         ? xhr.responseJSON.message 
                         : (xhr.statusText || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
-                    showToast('danger', errMsg);
+                    window.showToast('danger', errMsg);
                     console.error(xhr.responseText);
                     this.disabled = false;
                     this.innerHTML = originalHtml;
