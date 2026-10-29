@@ -12,3 +12,6 @@ window.jQuery = jQuery;
 // DataTables
 import DataTable from 'datatables.net-bs5';
 window.DataTable = DataTable;
+
+// Global Dialogs & Notifications System
+import './dialogs';

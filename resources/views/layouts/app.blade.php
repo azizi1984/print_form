@@ -23,6 +23,9 @@
         </div>
     </main>
 
+    {{-- Global Confirmation, Alert & Toast Components --}}
+    @include('layouts.partials.global_dialogs')
+
     @stack('scripts')
     @yield('scripts')
 </body>
