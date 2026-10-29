@@ -104,6 +104,24 @@
 
         initTable();
         window.addEventListener('load', initTable);
+
+        // ดักจับการส่งฟอร์มลบผู้ใช้ด้วย Global Confirm Modal
+        $(document).on('submit', '.form-delete-user', function(e) {
+            e.preventDefault();
+            const form = this;
+            const userName = $(this).data('user-name') || 'ผู้ใช้งานนี้';
+
+            window.showConfirmModal({
+                title: 'ยืนยันการลบผู้ใช้งาน',
+                message: `คุณต้องการลบผู้ใช้งาน "${userName}" ใช่หรือไม่?`,
+                type: 'danger',
+                iconClass: 'bi-trash-fill text-danger',
+                confirmText: 'ลบผู้ใช้',
+                onConfirm: function() {
+                    form.submit();
+                }
+            });
+        });
     });
 </script>
 @endpush

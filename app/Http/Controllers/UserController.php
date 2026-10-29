@@ -115,7 +115,7 @@ class UserController extends Controller
                         <a href="' . $editUrl . '" class="btn-action btn-action-edit" title="แก้ไขข้อมูลผู้ใช้">
                             <i class="bi bi-pencil-square"></i>
                         </a>
-                        <form action="' . $deleteUrl . '" method="POST" class="d-inline" onsubmit="return confirm(\'คุณต้องการลบผู้ใช้งาน \\\'' . e($user->name) . '\\\' ใช่หรือไม่?\');">
+                        <form action="' . $deleteUrl . '" method="POST" class="d-inline form-delete-user" data-user-name="' . e($user->name) . '">
                             <input type="hidden" name="_token" value="' . $csrfToken . '">
                             <input type="hidden" name="_method" value="DELETE">
                             <button type="submit" class="btn-action btn-action-delete" title="ลบผู้ใช้">
