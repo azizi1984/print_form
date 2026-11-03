@@ -58,10 +58,18 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $permissions = Permission::orderBy('name', 'ASC')->get();
-        $groupedPermissions = $this->groupPermissions($permissions);
+        // ดึงเฉพาะข้อมูลที่มี menu_id และเรียงตาม menu_id, order เหมือนหน้า roles?tab=permissions และ roles/{id}/edit
+        $permissions = Permission::whereNotNull('menu_id')
+            ->where('menu_id', '!=', '')
+            ->orderBy('menu_id', 'ASC')
+            ->orderBy('order', 'ASC')
+            ->get();
 
-        return view('admin.roles.create', compact('permissions', 'groupedPermissions'));
+        $selectedPermissions = old('permissions', []);
+        $permissionTree = $this->buildPermissionTreeByMenu($permissions, $selectedPermissions);
+        $existingRoles = Role::pluck('name')->toArray();
+
+        return view('admin.roles.create', compact('permissions', 'permissionTree', 'existingRoles', 'selectedPermissions'));
     }
 
     /**
@@ -73,6 +81,10 @@ class RoleController extends Controller
             'name' => 'required|string|max:255|unique:roles,name',
             'permissions' => 'nullable|array',
             'permissions.*' => 'string|exists:permissions,name',
+        ], [
+            'name.required' => 'กรุณากรอกชื่อบทบาท (Role Name)',
+            'name.unique' => 'ชื่อบทบาทนี้มีอยู่ในระบบแล้ว กรุณาใช้ชื่ออื่น',
+            'name.max' => 'ชื่อบทบาทต้องมีความยาวไม่เกิน 255 ตัวอักษร',
         ]);
 
         $role = Role::create([
@@ -81,13 +93,13 @@ class RoleController extends Controller
         ]);
 
         if ($request->has('permissions')) {
-            $role->syncPermissions($request->input('permissions'));
+            $role->syncPermissions($request->input('permissions', []));
         }
 
         // Reset permission cache
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        return redirect()->route('roles.index')->with('success', 'Role created successfully.');
+        return redirect()->route('roles.index')->with('success', 'สร้างบทบาทใหม่เรียบร้อยแล้ว');
     }
 
     /**
