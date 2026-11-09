@@ -40,9 +40,11 @@
                 </div>
 
                 {{-- Add Permission Button --}}
-                <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 shadow-xs" data-bs-toggle="modal" data-bs-target="#createPermissionModal" id="btnOpenCreatePermModal">
-                    <i class="bi bi-plus-circle me-1"></i> เพิ่ม Permission
-                </button>
+                @can('CreatePermission')
+                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 shadow-xs" data-bs-toggle="modal" data-bs-target="#createPermissionModal" id="btnOpenCreatePermModal">
+                        <i class="bi bi-plus-circle me-1"></i> Create Permission
+                    </button>
+                @endcan
             </div>
         </div>
     </div>
@@ -64,16 +66,18 @@
                         @foreach($unassignedPermissions as $uPerm)
                             <div class="badge bg-white text-dark border p-2 rounded d-flex align-items-center gap-2 shadow-2xs">
                                 <code class="fw-bold">{{ $uPerm->name }}</code>
-                                <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 rounded-pill edit-perm-btn"
-                                        data-id="{{ $uPerm->id }}"
-                                        data-name="{{ $uPerm->name }}"
-                                        data-guard="{{ $uPerm->guard_name }}"
-                                        data-menu-id=""
-                                        data-parent-id=""
-                                        data-order="{{ $uPerm->order ?? 1 }}"
-                                        title="กำหนดกลุ่มเมนูให้สิทธิ์นี้">
-                                    <i class="bi bi-pencil me-1"></i>กำหนดกลุ่มเมนู
-                                </button>
+                                @can('EditPermission')
+                                    <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 rounded-pill edit-perm-btn"
+                                            data-id="{{ $uPerm->id }}"
+                                            data-name="{{ $uPerm->name }}"
+                                            data-guard="{{ $uPerm->guard_name }}"
+                                            data-menu-id=""
+                                            data-parent-id=""
+                                            data-order="{{ $uPerm->order ?? 1 }}"
+                                            title="กำหนดกลุ่มเมนูให้สิทธิ์นี้">
+                                        <i class="bi bi-pencil me-1"></i>กำหนดกลุ่มเมนู
+                                    </button>
+                                @endcan
                             </div>
                         @endforeach
                     </div>
@@ -109,12 +113,14 @@
 
                             <div class="d-flex align-items-center gap-2">
                                 {{-- Quick Add to this menu group --}}
-                                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 quick-add-to-group-btn" 
-                                        data-menu-id="{{ $menuId }}" 
-                                        data-menu-name="{{ $group['group_name'] }}"
-                                        title="เพิ่มสิทธิ์ใหม่ในกลุ่มเมนูนี้">
-                                    <i class="bi bi-plus-circle me-1"></i> เพิ่มสิทธิ์ในกลุ่มนี้
-                                </button>
+                                @can('CreatePermission')
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 quick-add-to-group-btn" 
+                                            data-menu-id="{{ $menuId }}" 
+                                            data-menu-name="{{ $group['group_name'] }}"
+                                            title="เพิ่มสิทธิ์ใหม่ในกลุ่มเมนูนี้">
+                                        <i class="bi bi-plus-circle me-1"></i> Add permission to this group
+                                    </button>
+                                @endcan
 
                                 {{-- Toggle collapse --}}
                                 <button class="btn btn-light btn-sm rounded-circle p-1 text-muted collapsed collapse-toggle-btn" type="button" 
@@ -162,9 +168,11 @@
                 <i class="bi bi-shield-lock text-secondary d-block mb-3" style="font-size: 3rem;"></i>
                 <h6 class="fw-bold text-dark">ยังไม่มีข้อมูล Permission ในระบบ</h6>
                 <p class="text-muted small mb-4">เริ่มต้นสร้างสิทธิ์การใช้งานเพื่อนำไปจัดสรรในบทบาทต่างๆ</p>
-                <button type="button" class="btn btn-primary btn-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createPermissionModal">
-                    <i class="bi bi-plus-circle me-1"></i> เพิ่ม Permission แรก
-                </button>
+                @can('CreatePermission')
+                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createPermissionModal">
+                        <i class="bi bi-plus-circle me-1"></i> Create Permission แรก
+                    </button>
+                @endcan
             </div>
         </div>
     @endif

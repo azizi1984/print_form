@@ -85,36 +85,42 @@
     <td class="text-end pe-4 py-2">
         <div class="d-inline-flex align-items-center gap-1">
             {{-- Quick Add Sub-permission --}}
-            <button type="button" class="btn btn-action btn-action-view quick-add-sub-perm-btn" 
-                    data-menu-id="{{ $menuId }}"
-                    data-menu-name="{{ $menuName }}"
-                    data-parent-id="{{ $perm->id }}"
-                    data-parent-name="{{ $node['title'] }} ({{ $perm->name }})"
-                    title="เพิ่มสิทธิ์ย่อยใต้สิทธิ์นี้ (Quick Add Sub-Permission)">
-                <i class="bi bi-plus-lg"></i>
-            </button>
+            @can('QuickAddSubPermission')
+                <button type="button" class="btn btn-action btn-action-view quick-add-sub-perm-btn" 
+                        data-menu-id="{{ $menuId }}"
+                        data-menu-name="{{ $menuName }}"
+                        data-parent-id="{{ $perm->id }}"
+                        data-parent-name="{{ $node['title'] }} ({{ $perm->name }})"
+                        title="เพิ่มสิทธิ์ย่อยใต้สิทธิ์นี้ (Quick Add Sub-Permission)">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+            @endcan
 
             {{-- Edit Permission --}}
-            <button type="button" class="btn btn-action btn-action-edit edit-perm-btn"
-                    data-id="{{ $perm->id }}"
-                    data-name="{{ $perm->name }}"
-                    data-guard="{{ $perm->guard_name }}"
-                    data-menu-id="{{ $perm->menu_id }}"
-                    data-parent-id="{{ $perm->parent_id }}"
-                    data-order="{{ $perm->order }}"
-                    title="แก้ไขสิทธิ์">
-                <i class="bi bi-pencil"></i>
-            </button>
+            @can('EditPermission')
+                <button type="button" class="btn btn-action btn-action-edit edit-perm-btn"
+                        data-id="{{ $perm->id }}"
+                        data-name="{{ $perm->name }}"
+                        data-guard="{{ $perm->guard_name }}"
+                        data-menu-id="{{ $perm->menu_id }}"
+                        data-parent-id="{{ $perm->parent_id }}"
+                        data-order="{{ $perm->order }}"
+                        title="แก้ไขสิทธิ์">
+                    <i class="bi bi-pencil"></i>
+                </button>
+            @endcan
 
             {{-- Delete Permission --}}
-            <button type="button" class="btn btn-action btn-action-delete delete-perm-btn"
-                    data-id="{{ $perm->id }}"
-                    data-name="{{ $perm->name }}"
-                    data-title="{{ $node['title'] }}"
-                    data-has-children="{{ $hasChildren ? '1' : '0' }}"
-                    title="ลบสิทธิ์">
-                <i class="bi bi-trash"></i>
-            </button>
+            @can('DeletePermission')
+                <button type="button" class="btn btn-action btn-action-delete delete-perm-btn"
+                        data-id="{{ $perm->id }}"
+                        data-name="{{ $perm->name }}"
+                        data-title="{{ $node['title'] }}"
+                        data-has-children="{{ $hasChildren ? '1' : '0' }}"
+                        title="ลบสิทธิ์">
+                    <i class="bi bi-trash"></i>
+                </button>
+            @endcan
         </div>
     </td>
 </tr>

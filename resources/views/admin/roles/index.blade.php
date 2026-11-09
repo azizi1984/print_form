@@ -15,13 +15,17 @@
     </div>
     <div>
         @if(($tab ?? 'roles') === 'permissions')
-            <button type="button" class="btn btn-primary shadow-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#createPermissionModal" id="btnTopAddPermission">
-                <i class="bi bi-plus-circle me-1"></i> เพิ่ม Permission
-            </button>
+            @can('CreatePermission')
+                <button type="button" class="btn btn-primary shadow-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#createPermissionModal" id="btnTopAddPermission">
+                    <i class="bi bi-plus-circle me-1"></i> Create Permission
+                </button>
+            @endcan
         @else
-            <a class="btn btn-primary shadow-sm rounded-pill px-3" href="{{ route('roles.create') }}">
-                <i class="bi bi-plus-circle me-1"></i> Create New Role
-            </a>
+            @can('CreateRole')
+                <a class="btn btn-primary shadow-sm rounded-pill px-3" href="{{ route('roles.create') }}">
+                    <i class="bi bi-plus-circle me-1"></i> Create New Role
+                </a>
+            @endcan
         @endif
     </div>
 </div>
@@ -118,40 +122,46 @@
                                 </td>
                                 <td class="text-end pe-4">
                                     <div class="d-flex justify-content-end align-items-center gap-1">
-                                        <a class="btn-action btn-action-edit" href="{{ route('roles.edit', $role->id) }}" title="Edit Role">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        @if(!in_array($role->name, ['Super Admin']))
-                                            <button type="button" class="btn-action btn-action-delete" data-bs-toggle="modal" data-bs-target="#deleteRoleModal{{ $role->id }}" title="Delete Role">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        @endif
+                                        @can('EditRole')
+                                            <a class="btn-action btn-action-edit" href="{{ route('roles.edit', $role->id) }}" title="Edit Role">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        @endcan
+                                        @can('DeleteRole')
+                                            @if(!in_array($role->name, ['Super Admin']))
+                                                <button type="button" class="btn-action btn-action-delete" data-bs-toggle="modal" data-bs-target="#deleteRoleModal{{ $role->id }}" title="Delete Role">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            @endif
+                                        @endcan
                                     </div>
 
                                     <!-- Delete Role Modal -->
-                                    @if(!in_array($role->name, ['Super Admin']))
-                                        <div class="modal fade text-start" id="deleteRoleModal{{ $role->id }}" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered modal-sm">
-                                                <div class="modal-content border-0 shadow">
-                                                    <div class="modal-body text-center p-4">
-                                                        <div class="text-danger mb-3">
-                                                            <i class="bi bi-exclamation-circle" style="font-size: 3rem;"></i>
-                                                        </div>
-                                                        <h5 class="fw-bold mb-2">ยืนยันการลบ Role?</h5>
-                                                        <p class="text-muted small mb-4">คุณแน่ใจหรือว่าต้องการลบ Role <strong>"{{ $role->name }}"</strong>? การกระทำนี้ไม่สามารถย้อนกลับได้</p>
-                                                        <form action="{{ route('roles.destroy', $role->id) }}" method="POST">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <div class="d-flex justify-content-center gap-2">
-                                                                <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">ยกเลิก</button>
-                                                                <button type="submit" class="btn btn-danger px-3">ยืนยันลบ</button>
+                                    @can('DeleteRole')
+                                        @if(!in_array($role->name, ['Super Admin']))
+                                            <div class="modal fade text-start" id="deleteRoleModal{{ $role->id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-sm">
+                                                    <div class="modal-content border-0 shadow">
+                                                        <div class="modal-body text-center p-4">
+                                                            <div class="text-danger mb-3">
+                                                                <i class="bi bi-exclamation-circle" style="font-size: 3rem;"></i>
                                                             </div>
-                                                        </form>
+                                                            <h5 class="fw-bold mb-2">ยืนยันการลบ Role?</h5>
+                                                            <p class="text-muted small mb-4">คุณแน่ใจหรือว่าต้องการลบ Role <strong>"{{ $role->name }}"</strong>? การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+                                                            <form action="{{ route('roles.destroy', $role->id) }}" method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <div class="d-flex justify-content-center gap-2">
+                                                                    <button type="button" class="btn btn-light px-3" data-bs-dismiss="modal">ยกเลิก</button>
+                                                                    <button type="submit" class="btn btn-danger px-3">ยืนยันลบ</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    @endif
+                                        @endif
+                                    @endcan
                                 </td>
                             </tr>
                         @empty
@@ -173,8 +183,12 @@
 </div>
 
 {{-- Modals for Permissions --}}
-@include('admin.roles.partials.permission_create_modal')
-@include('admin.roles.partials.permission_edit_modal')
+@canany(['CreatePermission', 'QuickAddSubPermission'])
+    @include('admin.roles.partials.permission_create_modal')
+@endcanany
+@can('EditPermission')
+    @include('admin.roles.partials.permission_edit_modal')
+@endcan
 
 @push('scripts')
     @include('admin.roles.partials.permission_scripts')
