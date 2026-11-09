@@ -31,10 +31,32 @@ class User extends Authenticatable
         'lastname',
         'email',
         'password',
+        'temporary_token',
         'lsp_tax_no',
         'lsp_comp_nmt',
         'lsp',
     ];
+
+    /**
+     * Get the user's full name from firstname and lastname (or fallback to name/username).
+     */
+    public function getNameAttribute(?string $value): string
+    {
+        $fullName = trim(($this->firstname ?? '') . ' ' . ($this->lastname ?? ''));
+        if ($fullName !== '') {
+            return $fullName;
+        }
+
+        return $value ?: ($this->username ?? '');
+    }
+
+    /**
+     * Relationship to Profile model.
+     */
+    public function profile(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Profile::class, 'profile_id', 'profile_id');
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -56,6 +78,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'status' => 'integer',
         ];
     }
 

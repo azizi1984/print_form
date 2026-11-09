@@ -35,12 +35,13 @@
                 <thead>
                     <tr>
                         <th class="text-center" style="width: 5%;">No.</th>
-                        <th style="width: 25%;">Name / Username</th>
-                        <th style="width: 20%;">Email</th>
-                        <th class="text-center" style="width: 15%;">Role</th>
-                        <th class="text-center" style="width: 10%;">Status</th>
-                        <th class="text-center" style="width: 13%;">Created Date</th>
-                        <th class="text-center" style="width: 12%;">Action</th>
+                        <th style="width: 24%;">Name / Username</th>
+                        <th class="text-center" style="width: 12%;">Profile ID</th>
+                        <th style="width: 18%;">Email</th>
+                        <th class="text-center" style="width: 12%;">Role</th>
+                        <th class="text-center" style="width: 9%;">Status</th>
+                        <th class="text-center" style="width: 11%;">Created Date</th>
+                        <th class="text-center" style="width: 9%;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,15 +56,28 @@
 @push('scripts')
 <script type="module">
     document.addEventListener('DOMContentLoaded', function() {
+        @if ($message = Session::get('success'))
+            if (typeof window.showToast === 'function') {
+                window.showToast('success', @json($message));
+            }
+        @endif
+
+        @if ($message = Session::get('error'))
+            if (typeof window.showToast === 'function') {
+                window.showToast('error', @json($message));
+            }
+        @endif
+
         const initTable = () => {
             if (typeof $ !== 'undefined' && $.fn && $.fn.DataTable) {
                 if ($.fn.DataTable.isDataTable('#users_table')) {
-                    $('#users_table').DataTable().destroy();
+                    return;
                 }
 
                 $('#users_table').DataTable({
                     processing: true,
                     serverSide: true,
+                    pagingType: 'full_numbers',
                     pageLength: 10,
                     lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                     ajax: {
@@ -75,14 +89,15 @@
                     },
                     columns: [
                         { data: 'no', name: 'id', className: 'text-center fw-semibold text-muted', orderable: false, searchable: false },
-                        { data: 'name', name: 'name', orderable: true, searchable: true },
+                        { data: 'name', name: 'firstname', orderable: true, searchable: true },
+                        { data: 'profile_id', name: 'profile_id', className: 'text-center', orderable: true, searchable: true },
                         { data: 'email', name: 'email', orderable: true, searchable: true },
                         { data: 'role', name: 'role', className: 'text-center', orderable: false, searchable: true },
                         { data: 'status', name: 'status', className: 'text-center', orderable: true, searchable: true },
                         { data: 'created_at', name: 'created_at', className: 'text-center', orderable: true, searchable: true },
                         { data: 'action', name: 'action', className: 'text-center', orderable: false, searchable: false }
                     ],
-                    order: [[5, 'desc']],
+                    order: [[6, 'desc']],
                     language: {
                         lengthMenu: "แสดง _MENU_ รายการ",
                         search: "ค้นหา:",
@@ -103,7 +118,6 @@
         };
 
         initTable();
-        window.addEventListener('load', initTable);
 
         // ดักจับการส่งฟอร์มลบผู้ใช้ด้วย Global Confirm Modal
         $(document).on('submit', '.form-delete-user', function(e) {
